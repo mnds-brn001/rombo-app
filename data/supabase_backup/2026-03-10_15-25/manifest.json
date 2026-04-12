@@ -1,0 +1,107 @@
+{
+  "exported_at_utc": "2026-03-10T15:25:40.605283+00:00",
+  "tables": [
+    {
+      "schema": "public",
+      "table": "app_usage_log",
+      "rows": 916,
+      "file": "public_app_usage_log.parquet"
+    },
+    {
+      "schema": "public",
+      "table": "ingestion_state",
+      "rows": 5,
+      "file": "public_ingestion_state.parquet"
+    },
+    {
+      "schema": "public",
+      "table": "orders",
+      "rows": 40997,
+      "file": "public_orders.parquet"
+    },
+    {
+      "schema": "public",
+      "table": "orders_enriched",
+      "rows": 57382,
+      "file": "public_orders_enriched.parquet"
+    },
+    {
+      "schema": "public",
+      "table": "orders_enriched_backup_old",
+      "rows": 46101,
+      "file": "public_orders_enriched_backup_old.parquet"
+    },
+    {
+      "schema": "public",
+      "table": "orders_lines",
+      "rows": 48020,
+      "file": "public_orders_lines.parquet"
+    },
+    {
+      "schema": "public",
+      "table": "reviews_mercadolivre",
+      "rows": 127,
+      "file": "public_reviews_mercadolivre.csv"
+    },
+    {
+      "schema": "public",
+      "table": "reviews_product_agg",
+      "rows": 0,
+      "file": "public_reviews_product_agg.parquet"
+    },
+    {
+      "schema": "public",
+      "table": "reviews_shopee",
+      "rows": 16053,
+      "file": "public_reviews_shopee.parquet"
+    },
+    {
+      "schema": "public",
+      "table": "reviews_site",
+      "rows": 401,
+      "file": "public_reviews_site.parquet"
+    },
+    {
+      "schema": "public",
+      "table": "stock_movements",
+      "rows": 282195,
+      "file": "public_stock_movements.parquet"
+    },
+    {
+      "schema": "public",
+      "table": "stock_snapshot_enriched",
+      "rows": 40623,
+      "file": "public_stock_snapshot_enriched.parquet"
+    },
+    {
+      "schema": "bi",
+      "table": "mv_best_skus_bcg",
+      "error": "Execution failed on sql 'SELECT * FROM \"bi\".\"mv_best_skus_bcg\"': permission denied for schema bi\nLINE 1: SELECT * FROM \"bi\".\"mv_best_skus_bcg\"\n                      ^\n"
+    },
+    {
+      "schema": "bi",
+      "table": "mv_cancellation_monthly",
+      "error": "Execution failed on sql 'SELECT * FROM \"bi\".\"mv_cancellation_monthly\"': permission denied for schema bi\nLINE 1: SELECT * FROM \"bi\".\"mv_cancellation_monthly\"\n                      ^\n"
+    },
+    {
+      "schema": "bi",
+      "table": "mv_curva_abc_skus",
+      "error": "Execution failed on sql 'SELECT * FROM \"bi\".\"mv_curva_abc_skus\"': permission denied for schema bi\nLINE 1: SELECT * FROM \"bi\".\"mv_curva_abc_skus\"\n                      ^\n"
+    },
+    {
+      "schema": "bi",
+      "table": "mv_delivery_monthly",
+      "error": "Execution failed on sql 'SELECT * FROM \"bi\".\"mv_delivery_monthly\"': permission denied for schema bi\nLINE 1: SELECT * FROM \"bi\".\"mv_delivery_monthly\"\n                      ^\n"
+    },
+    {
+      "schema": "bi",
+      "table": "mv_kpis_daily",
+      "error": "Execution failed on sql 'SELECT * FROM \"bi\".\"mv_kpis_daily\"': permission denied for schema bi\nLINE 1: SELECT * FROM \"bi\".\"mv_kpis_daily\"\n                      ^\n"
+    },
+    {
+      "schema": "bi",
+      "table": "mv_revenue_monthly",
+      "error": "Execution failed on sql 'SELECT * FROM \"bi\".\"mv_revenue_monthly\"': permission denied for schema bi\nLINE 1: SELECT * FROM \"bi\".\"mv_revenue_monthly\"\n                      ^\n"
+    }
+  ]
+}

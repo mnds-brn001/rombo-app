@@ -31,10 +31,6 @@ ENV/
 venv312/
 
 # Arquivos de Dados (Lixo / Local)
-data/
-*.parquet
-*.jsonl
-*.csv
 *.xlsx
 *.xls
 
@@ -181,3 +177,8 @@ SISTEMA_CACHE_INTELIGENTE_RESUMO.md
 
 docs/
 .streamlit/secrets.toml
+
+dados_cliente/uploads/
+dados_cliente/processed/
+dados_cliente/temp/
+dados_cliente/backups/
