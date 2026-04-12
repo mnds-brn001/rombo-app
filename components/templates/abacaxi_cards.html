@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abacaxi - BCG Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0e1424;
+            padding: 40px;
+            min-height: 100vh;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(32, 42, 60, 0.9), rgba(55, 64, 80, 0.7));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(203, 210, 220, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(203, 210, 220, 0.3), transparent);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+            border-color: rgba(203, 210, 220, 0.2);
+        }
+
+        /* Card Individual de Produto */
+        .product-card {
+            width: 360px;
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .product-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #cbd2dc;
+            margin-bottom: 8px;
+        }
+
+        /* Abacaxi - Vermelho */
+        .quadrant-badge.abacaxi {
+            background: linear-gradient(135deg, rgba(244, 67, 54, 0.2), rgba(211, 47, 47, 0.15));
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            color: #ef5350;
+            box-shadow: 0 0 12px rgba(244, 67, 54, 0.25);
+        }
+
+        .quadrant-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .metric-item {
+            background: rgba(14, 20, 36, 0.4);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(203, 210, 220, 0.05);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: rgba(203, 210, 220, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #cbd2dc;
+        }
+
+        .metric-value.small {
+            font-size: 16px;
+        }
+
+        .growth-critical {
+            color: #ef5350;
+            font-weight: 800;
+        }
+
+        .score-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(55, 64, 80, 0.5), rgba(32, 42, 60, 0.5));
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            border: 1px solid rgba(203, 210, 220, 0.1);
+        }
+
+        /* Insight Box - Abacaxi */
+        .insight-box.abacaxi {
+            background: linear-gradient(135deg, rgba(244, 67, 54, 0.08), rgba(211, 47, 47, 0.05));
+            border-left: 3px solid #e53935;
+        }
+
+        .insight-box {
+            padding: 14px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .insight-label.abacaxi {
+            color: #ef5350;
+        }
+
+        .insight-label {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .insight-text {
+            font-size: 13px;
+            color: rgba(203, 210, 220, 0.9);
+            line-height: 1.5;
+        }
+
+        /* Tooltip de Estoque - Abacaxi */
+        .stock-tooltip.abacaxi {
+            background: linear-gradient(135deg, rgba(69, 20, 18, 0.98), rgba(56, 16, 14, 0.95));
+            border: 1px solid rgba(244, 67, 54, 0.4);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(244, 67, 54, 0.2);
+        }
+
+        .stock-tooltip.abacaxi .stock-line strong {
+            color: #ef5350;
+        }
+
+        .stock-tooltip {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .card:hover .stock-tooltip {
+            opacity: 1;
+        }
+
+        .stock-line {
+            font-size: 12px;
+            color: #cbd2dc;
+            white-space: nowrap;
+            margin: 4px 0;
+        }
+
+        /* Card de Quadrante - Abacaxi */
+        .quadrant-card.abacaxi {
+            width: 480px;
+            background: linear-gradient(135deg, rgba(69, 20, 18, 0.5), rgba(56, 16, 14, 0.6));
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .quadrant-card.abacaxi::before {
+            background: linear-gradient(90deg, transparent, rgba(244, 67, 54, 0.5), transparent);
+        }
+
+        .quadrant-header {
+            margin-bottom: 24px;
+        }
+
+        .quadrant-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #cbd2dc;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .quadrant-icon {
+            font-size: 32px;
+        }
+
+        .quadrant-icon.abacaxi {
+            filter: drop-shadow(0 0 8px rgba(244, 67, 54, 0.4));
+        }
+
+        .quadrant-subtitle.abacaxi {
+            color: #ef5350;
+        }
+
+        .quadrant-subtitle {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .quadrant-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: rgba(14, 20, 36, 0.5);
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .quadrant-card.abacaxi .stat-box {
+            background: rgba(56, 16, 14, 0.4);
+            border: 1px solid rgba(244, 67, 54, 0.25);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #cbd2dc;
+            margin-bottom: 6px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: rgba(203, 210, 220, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .divider.abacaxi {
+            background: linear-gradient(90deg, transparent, rgba(244, 67, 54, 0.3), transparent);
+        }
+
+        .divider {
+            height: 1px;
+            margin: 20px 0;
+        }
+
+        .action-button.abacaxi {
+            background: linear-gradient(135deg, rgba(244, 67, 54, 0.15), rgba(211, 47, 47, 0.1));
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            color: #ef5350;
+        }
+
+        .action-button.abacaxi:hover {
+            background: linear-gradient(135deg, rgba(244, 67, 54, 0.25), rgba(211, 47, 47, 0.15));
+            border-color: rgba(244, 67, 54, 0.7);
+            box-shadow: 0 4px 16px rgba(244, 67, 54, 0.3);
+        }
+
+        .action-button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .quadrant-card.abacaxi .metric-item {
+            background: rgba(56, 16, 14, 0.3);
+            border: 1px solid rgba(244, 67, 54, 0.2);
+        }
+
+        .quadrant-card.abacaxi .insight-box {
+            background: linear-gradient(135deg, rgba(244, 67, 54, 0.12), rgba(211, 47, 47, 0.08));
+            border-left: 3px solid #ef5350;
+        }
+
+        /* Badge de Alerta Crítico */
+        .critical-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(244, 67, 54, 0.15);
+            border: 1px solid rgba(244, 67, 54, 0.4);
+            color: #ef5350;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Card Individual - Cabine Led (Abacaxi) -->
+    <div class="card product-card">
+        <div class="stock-tooltip abacaxi">
+            <div class="stock-line"><strong>9 unid.</strong> em estoque</div>
+            <div class="stock-line">Valor: <strong>R$ 288,63</strong></div>
+        </div>
+
+        <div class="product-header">
+            <div>
+                <div class="product-title">Cabine Led</div>
+                <div class="score-badge">Score: 0.154</div>
+            </div>
+            <div class="quadrant-badge abacaxi">✂️ Abacaxi</div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-item">
+                <div class="metric-label">Market Share</div>
+                <div class="metric-value small">0.1%</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Crescimento</div>
+                <div class="metric-value small growth-critical">-57.7%</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Preço Médio</div>
+                <div class="metric-value small">R$ 32,07</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Vendas</div>
+                <div class="metric-value small">9</div>
+            </div>
+        </div>
+
+        <div class="insight-box abacaxi">
+            <div class="insight-label abacaxi">🧠 Insight-Chave</div>
+            <div class="insight-text">
+                ✂️ Ação Imediata: Descontinuar e liquidar estoque para liberar capital.
+            </div>
+        </div>
+
+        <div class="critical-badge">
+            ⚠️ Capital Imobilizado
+        </div>
+    </div>
+
+    <!-- Card Quadrante - Abacaxi -->
+    <div class="card quadrant-card abacaxi">
+        <div class="stock-tooltip abacaxi">
+            <div class="stock-line"><strong>164 unid.</strong> em estoque</div>
+            <div class="stock-line">Valor: <strong>R$ 1.664,66</strong></div>
+        </div>
+
+        <div class="quadrant-header">
+            <div class="quadrant-title">
+                <span class="quadrant-icon abacaxi">✂️</span>
+                Abacaxi
+            </div>
+            <div class="quadrant-subtitle abacaxi">Descontinuar</div>
+        </div>
+
+        <div class="quadrant-stats">
+            <div class="stat-box">
+                <div class="stat-value">18</div>
+                <div class="stat-label">Categorias</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">164</div>
+                <div class="stat-label">Unidades</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">0.14</div>
+                <div class="stat-label">Score Médio</div>
+            </div>
+        </div>
+
+        <div class="divider abacaxi"></div>
+
+        <div class="metric-item" style="margin-bottom: 20px;">
+            <div class="metric-label">Valor Total em Estoque</div>
+            <div class="metric-value">R$ 1.664,66</div>
+        </div>
+
+        <div class="insight-box">
+            <div class="insight-label abacaxi">🧠 Estratégia Recomendada</div>
+            <div class="insight-text">
+                Produtos com baixa participação e crescimento negativo. Prioridade: liquidar estoque com descontos agressivos e descontinuar linhas para liberar capital e espaço de prateleira para Estrelas e Interrogações promissoras.
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button class="action-button abacaxi">📊 Ver Todas as 18 Categorias</button>
+        </div>
+
+        <div class="critical-badge" style="width: 100%; justify-content: center;">
+            ⚠️ Ação Urgente Requerida
+        </div>
+    </div>
+</body>
+</html>

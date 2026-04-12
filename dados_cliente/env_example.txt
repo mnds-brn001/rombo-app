@@ -1,0 +1,18 @@
+# Exemplo de arquivo .env
+# Copie este arquivo para .env e preencha com seus dados reais
+
+# Google Analytics 4
+GOOGLE_APPLICATION_CREDENTIALS=./config/ga-credentials.json
+GA_PROPERTY_ID=123456789
+
+# Configurações do Cliente
+CLIENT_NAME=Nome do Cliente
+CLIENT_LOGO_PATH=./assets/logo_cliente.png
+
+# Configurações da API (se usar)
+API_BASE_URL=https://api.cliente.com
+API_TOKEN=seu_token_aqui
+
+# Configurações do Dashboard
+DASHBOARD_TITLE=Dashboard Analytics - Cliente
+MARKETING_SPEND_DEFAULT=50000

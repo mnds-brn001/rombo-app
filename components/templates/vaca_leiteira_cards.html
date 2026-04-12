@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaca Leiteira - BCG Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0e1424;
+            padding: 40px;
+            min-height: 100vh;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(32, 42, 60, 0.9), rgba(55, 64, 80, 0.7));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(203, 210, 220, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(203, 210, 220, 0.3), transparent);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+            border-color: rgba(203, 210, 220, 0.2);
+        }
+
+        /* Card Individual de Produto */
+        .product-card {
+            width: 360px;
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .product-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #cbd2dc;
+            margin-bottom: 8px;
+        }
+
+        /* Vaca Leiteira - Verde */
+        .quadrant-badge.vaca {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(56, 142, 60, 0.15));
+            border: 1px solid rgba(76, 175, 80, 0.45);
+            color: #81c784;
+            box-shadow: 0 0 12px rgba(76, 175, 80, 0.2);
+        }
+
+        .quadrant-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .metric-item {
+            background: rgba(14, 20, 36, 0.4);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(203, 210, 220, 0.05);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: rgba(203, 210, 220, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #cbd2dc;
+        }
+
+        .metric-value.small {
+            font-size: 16px;
+        }
+
+        .growth-negative {
+            color: #ef5350;
+        }
+
+        .growth-warning {
+            color: #ff9800;
+            font-weight: 800;
+        }
+
+        .score-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(55, 64, 80, 0.5), rgba(32, 42, 60, 0.5));
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            border: 1px solid rgba(203, 210, 220, 0.1);
+        }
+
+        /* Insight Box - Vaca Leiteira */
+        .insight-box.vaca {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.08), rgba(56, 142, 60, 0.05));
+            border-left: 3px solid #66bb6a;
+        }
+
+        .insight-box {
+            padding: 14px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .insight-label.vaca {
+            color: #81c784;
+        }
+
+        .insight-label {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .insight-text {
+            font-size: 13px;
+            color: rgba(203, 210, 220, 0.9);
+            line-height: 1.5;
+        }
+
+        /* Tooltip de Estoque - Vaca Leiteira */
+        .stock-tooltip.vaca {
+            background: linear-gradient(135deg, rgba(27, 54, 28, 0.98), rgba(21, 43, 22, 0.95));
+            border: 1px solid rgba(76, 175, 80, 0.35);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(76, 175, 80, 0.15);
+        }
+
+        .stock-tooltip.vaca .stock-line strong {
+            color: #81c784;
+        }
+
+        .stock-tooltip {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .card:hover .stock-tooltip {
+            opacity: 1;
+        }
+
+        .stock-line {
+            font-size: 12px;
+            color: #cbd2dc;
+            white-space: nowrap;
+            margin: 4px 0;
+        }
+
+        /* Card de Quadrante - Vaca Leiteira */
+        .quadrant-card.vaca {
+            width: 480px;
+            background: linear-gradient(135deg, rgba(33, 64, 35, 0.5), rgba(27, 52, 28, 0.6));
+            border: 1px solid rgba(76, 175, 80, 0.25);
+        }
+
+        .quadrant-card.vaca::before {
+            background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.45), transparent);
+        }
+
+        .quadrant-header {
+            margin-bottom: 24px;
+        }
+
+        .quadrant-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #cbd2dc;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .quadrant-icon {
+            font-size: 32px;
+        }
+
+        .quadrant-icon.vaca {
+            filter: drop-shadow(0 0 8px rgba(76, 175, 80, 0.3));
+        }
+
+        .quadrant-subtitle.vaca {
+            color: #81c784;
+        }
+
+        .quadrant-subtitle {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .quadrant-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: rgba(14, 20, 36, 0.5);
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .quadrant-card.vaca .stat-box {
+            background: rgba(27, 52, 28, 0.4);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #cbd2dc;
+            margin-bottom: 6px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: rgba(203, 210, 220, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .divider.vaca {
+            background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.25), transparent);
+        }
+
+        .divider {
+            height: 1px;
+            margin: 20px 0;
+        }
+
+        .action-button.vaca {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.15), rgba(56, 142, 60, 0.1));
+            border: 1px solid rgba(76, 175, 80, 0.45);
+            color: #81c784;
+        }
+
+        .action-button.vaca:hover {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.25), rgba(56, 142, 60, 0.15));
+            border-color: rgba(76, 175, 80, 0.6);
+            box-shadow: 0 4px 16px rgba(76, 175, 80, 0.25);
+        }
+
+        .action-button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .quadrant-card.vaca .metric-item {
+            background: rgba(27, 52, 28, 0.3);
+            border: 1px solid rgba(76, 175, 80, 0.15);
+        }
+
+        .quadrant-card.vaca .insight-box {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.12), rgba(56, 142, 60, 0.08));
+            border-left: 3px solid #81c784;
+        }
+    </style>
+</head>
+<body>
+    <!-- Card Individual - Alicates de Cutícula (Vaca Leiteira) -->
+    <div class="card product-card">
+        <div class="stock-tooltip vaca">
+            <div class="stock-line"><strong>207 unid.</strong> em estoque</div>
+            <div class="stock-line">Valor: <strong>R$ 6.624,00</strong></div>
+        </div>
+
+        <div class="product-header">
+            <div>
+                <div class="product-title">Alicates de Cutícula</div>
+                <div class="score-badge">Score: 0.532</div>
+            </div>
+            <div class="quadrant-badge vaca">🐄 Vaca Leiteira</div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-item">
+                <div class="metric-label">Market Share</div>
+                <div class="metric-value small">19.5%</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Crescimento</div>
+                <div class="metric-value small growth-warning">-72.6%</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Preço Médio</div>
+                <div class="metric-value small">R$ 32,00</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Vendas</div>
+                <div class="metric-value small">3316</div>
+            </div>
+        </div>
+
+        <div class="insight-box vaca">
+            <div class="insight-label vaca">🧠 Insight-Chave</div>
+            <div class="insight-text">
+                📉 Risco de Declínio (-73%): Focar em retenção AGORA para não virar 'Abacaxi'.
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Quadrante - Vaca Leiteira -->
+    <div class="card quadrant-card vaca">
+        <div class="stock-tooltip vaca">
+            <div class="stock-line"><strong>1036 unid.</strong> em estoque</div>
+            <div class="stock-line">Valor: <strong>R$ 26.177,87</strong></div>
+        </div>
+
+        <div class="quadrant-header">
+            <div class="quadrant-title">
+                <span class="quadrant-icon vaca">🐄</span>
+                Vaca Leiteira
+            </div>
+            <div class="quadrant-subtitle vaca">Otimizar Margem</div>
+        </div>
+
+        <div class="quadrant-stats">
+            <div class="stat-box">
+                <div class="stat-value">32</div>
+                <div class="stat-label">Categorias</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">1036</div>
+                <div class="stat-label">Unidades</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">0.18</div>
+                <div class="stat-label">Score Médio</div>
+            </div>
+        </div>
+
+        <div class="divider vaca"></div>
+
+        <div class="metric-item" style="margin-bottom: 20px;">
+            <div class="metric-label">Valor Total em Estoque</div>
+            <div class="metric-value">R$ 26.177,87</div>
+        </div>
+
+        <div class="insight-box">
+            <div class="insight-label vaca">🧠 Estratégia Recomendada</div>
+            <div class="insight-text">
+                Produtos maduros com alta participação mas crescimento em declínio. Focar em otimização de margem, retenção de clientes e colheita de lucros para reinvestir em Estrelas.
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button class="action-button vaca">📊 Ver Todas as 32 Categorias</button>
+        </div>
+    </div>
+</body>
+</html>

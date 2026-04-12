@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card com Avaliações - BCG Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0e1424;
+            padding: 40px;
+            min-height: 100vh;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(32, 42, 60, 0.9), rgba(55, 64, 80, 0.7));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(203, 210, 220, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(203, 210, 220, 0.3), transparent);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+            border-color: rgba(203, 210, 220, 0.2);
+        }
+
+        /* Card Individual de Produto */
+        .product-card {
+            width: 360px;
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .product-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #cbd2dc;
+            margin-bottom: 8px;
+        }
+
+        .quadrant-badge.estrela {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 160, 0, 0.15));
+            border: 1px solid rgba(255, 193, 7, 0.45);
+            color: #ffd54f;
+            box-shadow: 0 0 12px rgba(255, 193, 7, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .metric-item {
+            background: rgba(14, 20, 36, 0.4);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(203, 210, 220, 0.05);
+        }
+
+        /* Métrica de Avaliação com Estrelas */
+        .metric-item.rating {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .rating-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .rating-stars {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .star {
+            color: #ffd54f;
+            font-size: 16px;
+        }
+
+        .star.empty {
+            color: rgba(203, 210, 220, 0.2);
+        }
+
+        .rating-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #cbd2dc;
+        }
+
+        .rating-count {
+            font-size: 12px;
+            color: rgba(203, 210, 220, 0.5);
+            margin-left: auto;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: rgba(203, 210, 220, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #cbd2dc;
+        }
+
+        .metric-value.small {
+            font-size: 16px;
+        }
+
+        .growth-hyper {
+            color: #ff9800;
+            font-weight: 800;
+        }
+
+        .score-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(55, 64, 80, 0.5), rgba(32, 42, 60, 0.5));
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            border: 1px solid rgba(203, 210, 220, 0.1);
+        }
+
+        .insight-box.estrela {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.08), rgba(255, 160, 0, 0.05));
+            border-left: 3px solid #ffb300;
+            padding: 14px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .insight-label.estrela {
+            color: #ffd54f;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .insight-text {
+            font-size: 13px;
+            color: rgba(203, 210, 220, 0.9);
+            line-height: 1.5;
+        }
+
+        .stock-tooltip.estrela {
+            background: linear-gradient(135deg, rgba(92, 70, 15, 0.98), rgba(77, 57, 10, 0.95));
+            border: 1px solid rgba(255, 193, 7, 0.35);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 193, 7, 0.15);
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .card:hover .stock-tooltip {
+            opacity: 1;
+        }
+
+        .stock-line {
+            font-size: 12px;
+            color: #cbd2dc;
+            white-space: nowrap;
+            margin: 4px 0;
+        }
+
+        .stock-tooltip.estrela .stock-line strong {
+            color: #ffd54f;
+        }
+
+        /* Variante sem avaliação */
+        .no-rating {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 8px;
+            background: rgba(14, 20, 36, 0.3);
+        }
+
+        .no-rating-text {
+            font-size: 12px;
+            color: rgba(203, 210, 220, 0.4);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <!-- Card COM Avaliação -->
+    <div class="card product-card">
+        <div class="stock-tooltip estrela">
+            <div class="stock-line"><strong>320 unid.</strong> em estoque</div>
+            <div class="stock-line">Valor: <strong>R$ 4.912,00</strong></div>
+        </div>
+
+        <div class="product-header">
+            <div>
+                <div class="product-title">Creme Facial Premium</div>
+                <div class="score-badge">Score: 0.487</div>
+            </div>
+            <div class="quadrant-badge estrela">⭐ Estrela Digital</div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-item">
+                <div class="metric-label">Market Share</div>
+                <div class="metric-value small">13.9%</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Crescimento</div>
+                <div class="metric-value small growth-hyper">1000%</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Preço Médio</div>
+                <div class="metric-value small">R$ 15,35</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Vendas</div>
+                <div class="metric-value small">4923</div>
+            </div>
+            
+            <!-- Métrica de Avaliação -->
+            <div class="metric-item rating">
+                <div class="rating-content">
+                    <div>
+                        <div class="metric-label">Avaliação</div>
+                        <div class="rating-stars">
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                            <span class="star">★</span>
+                        </div>
+                    </div>
+                    <div class="rating-value">4.8</div>
+                    <div class="rating-count">(1.234 avaliações)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="insight-box estrela">
+            <div class="insight-label estrela">🧠 Insight-Chave</div>
+            <div class="insight-text">
+                🔥 Hiper-Crescimento (1000%): Dobrar foco em estoque e marketing para capturar a demanda.
+            </div>
+        </div>
+    </div>
+
+    <!-- Card SEM Avaliação (template alternativo) -->
+    <div class="card product-card">
+        <div class="stock-tooltip estrela">
+            <div class="stock-line"><strong>320 unid.</strong> em estoque</div>
+            <div class="stock-line">Valor: <strong>R$ 4.912,00</strong></div>
+        </div>
+
+        <div class="product-header">
+            <div>
+                <div class="product-title">Creme Facial</div>
+                <div class="score-badge">Score: 0.487</div>
+            </div>
+            <div class="quadrant-badge estrela">⭐ Estrela Digital</div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-item">
+                <div class="metric-label">Market Share</div>
+                <div class="metric-value small">13.9%</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Crescimento</div>
+                <div class="metric-value small growth-hyper">1000%</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Preço Médio</div>
+                <div class="metric-value small">R$ 15,35</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Vendas</div>
+                <div class="metric-value small">4923</div>
+            </div>
+            
+            <!-- Sem avaliações disponíveis -->
+            <div class="metric-item no-rating">
+                <div class="metric-label">Avaliação</div>
+                <div class="no-rating-text">Sem avaliações disponíveis</div>
+            </div>
+        </div>
+
+        <div class="insight-box estrela">
+            <div class="insight-label estrela">🧠 Insight-Chave</div>
+            <div class="insight-text">
+                🔥 Hiper-Crescimento (1000%): Dobrar foco em estoque e marketing para capturar a demanda.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

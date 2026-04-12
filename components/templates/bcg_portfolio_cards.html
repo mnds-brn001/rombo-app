@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCG Portfolio Cards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0e1424;
+            padding: 40px;
+            min-height: 100vh;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(32, 42, 60, 0.9), rgba(55, 64, 80, 0.7));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(203, 210, 220, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(203, 210, 220, 0.3), transparent);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+            border-color: rgba(203, 210, 220, 0.2);
+        }
+
+        /* Card Individual de Produto */
+        .product-card {
+            width: 360px;
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .product-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #cbd2dc;
+            margin-bottom: 8px;
+        }
+
+        /* Interrogação - Azul */
+        .quadrant-badge.interrogacao {
+            background: linear-gradient(135deg, rgba(66, 153, 225, 0.2), rgba(49, 130, 206, 0.15));
+            border: 1px solid rgba(66, 153, 225, 0.4);
+            color: #5dade2;
+            box-shadow: 0 0 12px rgba(66, 153, 225, 0.15);
+        }
+
+        /* Estrela - Amarelo/Dourado */
+        .quadrant-badge.estrela {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 160, 0, 0.15));
+            border: 1px solid rgba(255, 193, 7, 0.45);
+            color: #ffd54f;
+            box-shadow: 0 0 12px rgba(255, 193, 7, 0.2);
+        }
+
+        .quadrant-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .metric-item {
+            background: rgba(14, 20, 36, 0.4);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(203, 210, 220, 0.05);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: rgba(203, 210, 220, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #cbd2dc;
+        }
+
+        .metric-value.small {
+            font-size: 16px;
+        }
+
+        .growth-positive {
+            color: #4caf50;
+        }
+
+        .growth-hyper {
+            color: #ff9800;
+            font-weight: 800;
+        }
+
+        .score-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(55, 64, 80, 0.5), rgba(32, 42, 60, 0.5));
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            border: 1px solid rgba(203, 210, 220, 0.1);
+        }
+
+        /* Insight Box - Interrogação */
+        .insight-box.interrogacao {
+            background: linear-gradient(135deg, rgba(66, 153, 225, 0.08), rgba(49, 130, 206, 0.05));
+            border-left: 3px solid #4a9ece;
+        }
+
+        /* Insight Box - Estrela */
+        .insight-box.estrela {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.08), rgba(255, 160, 0, 0.05));
+            border-left: 3px solid #ffb300;
+        }
+
+        .insight-box {
+            padding: 14px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .insight-label.interrogacao {
+            color: #5dade2;
+        }
+
+        .insight-label.estrela {
+            color: #ffd54f;
+        }
+
+        .insight-label {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .insight-text {
+            font-size: 13px;
+            color: rgba(203, 210, 220, 0.9);
+            line-height: 1.5;
+        }
+
+        /* Tooltip de Estoque - Interrogação */
+        .stock-tooltip.interrogacao {
+            background: linear-gradient(135deg, rgba(30, 58, 89, 0.98), rgba(23, 47, 72, 0.95));
+            border: 1px solid rgba(66, 153, 225, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(66, 153, 225, 0.15);
+        }
+
+        .stock-tooltip.interrogacao .stock-line strong {
+            color: #74b9ff;
+        }
+
+        /* Tooltip de Estoque - Estrela */
+        .stock-tooltip.estrela {
+            background: linear-gradient(135deg, rgba(92, 70, 15, 0.98), rgba(77, 57, 10, 0.95));
+            border: 1px solid rgba(255, 193, 7, 0.35);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 193, 7, 0.15);
+        }
+
+        .stock-tooltip.estrela .stock-line strong {
+            color: #ffd54f;
+        }
+
+        .stock-tooltip {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .card:hover .stock-tooltip {
+            opacity: 1;
+        }
+
+        .stock-line {
+            font-size: 12px;
+            color: #cbd2dc;
+            white-space: nowrap;
+            margin: 4px 0;
+        }
+
+        /* Card de Quadrante - Interrogação */
+        .quadrant-card.interrogacao {
+            width: 480px;
+            background: linear-gradient(135deg, rgba(41, 72, 107, 0.5), rgba(32, 54, 82, 0.6));
+            border: 1px solid rgba(66, 153, 225, 0.2);
+        }
+
+        .quadrant-card.interrogacao::before {
+            background: linear-gradient(90deg, transparent, rgba(66, 153, 225, 0.4), transparent);
+        }
+
+        /* Card de Quadrante - Estrela */
+        .quadrant-card.estrela {
+            width: 480px;
+            background: linear-gradient(135deg, rgba(92, 70, 15, 0.5), rgba(77, 57, 10, 0.6));
+            border: 1px solid rgba(255, 193, 7, 0.25);
+        }
+
+        .quadrant-card.estrela::before {
+            background: linear-gradient(90deg, transparent, rgba(255, 193, 7, 0.45), transparent);
+        }
+
+        .quadrant-header {
+            margin-bottom: 24px;
+        }
+
+        .quadrant-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #cbd2dc;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .quadrant-icon {
+            font-size: 32px;
+        }
+
+        .quadrant-icon.interrogacao {
+            filter: drop-shadow(0 0 8px rgba(66, 153, 225, 0.3));
+        }
+
+        .quadrant-icon.estrela {
+            filter: drop-shadow(0 0 8px rgba(255, 193, 7, 0.3));
+        }
+
+        .quadrant-subtitle.interrogacao {
+            color: #5dade2;
+        }
+
+        .quadrant-subtitle.estrela {
+            color: #ffd54f;
+        }
+
+        .quadrant-subtitle {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .quadrant-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: rgba(14, 20, 36, 0.5);
+            padding: 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(66, 153, 225, 0.15);
+            text-align: center;
+        }
+
+        .quadrant-card.interrogacao .stat-box {
+            background: rgba(23, 47, 72, 0.4);
+            border: 1px solid rgba(66, 153, 225, 0.15);
+        }
+
+        .quadrant-card.estrela .stat-box {
+            background: rgba(77, 57, 10, 0.4);
+            border: 1px solid rgba(255, 193, 7, 0.2);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #cbd2dc;
+            margin-bottom: 6px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: rgba(203, 210, 220, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .divider.interrogacao {
+            background: linear-gradient(90deg, transparent, rgba(66, 153, 225, 0.2), transparent);
+        }
+
+        .divider.estrela {
+            background: linear-gradient(90deg, transparent, rgba(255, 193, 7, 0.25), transparent);
+        }
+
+        .divider {
+            height: 1px;
+            margin: 20px 0;
+        }
+
+        .action-button.interrogacao {
+            background: linear-gradient(135deg, rgba(66, 153, 225, 0.15), rgba(49, 130, 206, 0.1));
+            border: 1px solid rgba(66, 153, 225, 0.4);
+            color: #5dade2;
+        }
+
+        .action-button.interrogacao:hover {
+            background: linear-gradient(135deg, rgba(66, 153, 225, 0.25), rgba(49, 130, 206, 0.15));
+            border-color: rgba(66, 153, 225, 0.6);
+            box-shadow: 0 4px 16px rgba(66, 153, 225, 0.2);
+        }
+
+        .action-button.estrela {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 160, 0, 0.1));
+            border: 1px solid rgba(255, 193, 7, 0.45);
+            color: #ffd54f;
+        }
+
+        .action-button.estrela:hover {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.25), rgba(255, 160, 0, 0.15));
+            border-color: rgba(255, 193, 7, 0.6);
+            box-shadow: 0 4px 16px rgba(255, 193, 7, 0.25);
+        }
+
+        .action-button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .quadrant-card.interrogacao .metric-item {
+            background: rgba(23, 47, 72, 0.3);
+            border: 1px solid rgba(66, 153, 225, 0.1);
+        }
+
+        .quadrant-card.estrela .metric-item {
+            background: rgba(77, 57, 10, 0.3);
+            border: 1px solid rgba(255, 193, 7, 0.15);
+        }
+
+        .quadrant-card.interrogacao .insight-box {
+            background: linear-gradient(135deg, rgba(66, 153, 225, 0.12), rgba(49, 130, 206, 0.08));
+            border-left: 3px solid #5dade2;
+        }
+
+        .quadrant-card.estrela .insight-box {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.12), rgba(255, 160, 0, 0.08));
+            border-left: 3px solid #ffd54f;
+        }
+    </style>
+</head>
+<body>
+    <!-- Card Individual - Creme Depilatório (Interrogação) -->
+    <div class="card product-card">
+        <div class="stock-tooltip interrogacao">
+            <div class="stock-line"><strong>1 unid.</strong> em estoque</div>
+            <div class="stock-line">Valor: <strong>R$ 32,88</strong></div>
+        </div>
+
+        <div class="product-header">
+            <div>
+                <div class="product-title">Creme Depilatório</div>
+                <div class="score-badge">Score: 0.154</div>
+            </div>
+            <div class="quadrant-badge interrogacao">🧪 Interrogação</div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-item">
+                <div class="metric-label">Market Share</div>
+                <div class="metric-value small">0.0%</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Crescimento</div>
+                <div class="metric-value small">0.0%</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Preço Médio</div>
+                <div class="metric-value small">R$ 32,88</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Vendas</div>
+                <div class="metric-value small">1</div>
+            </div>
+        </div>
+
+        <div class="insight-box interrogacao">
+            <div class="insight-label interrogacao">🧠 Insight-Chave</div>
+            <div class="insight-text">
+                🧪 Testar Mercado: Investimento controlado para validar potencial.
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Quadrante - Interrogação -->
+    <div class="card quadrant-card interrogacao">
+        <div class="stock-tooltip interrogacao">
+            <div class="stock-line"><strong>288 unid.</strong> em estoque</div>
+            <div class="stock-line">Valor: <strong>R$ 6.884,37</strong></div>
+        </div>
+
+        <div class="quadrant-header">
+            <div class="quadrant-title">
+                <span class="quadrant-icon interrogacao">🧪</span>
+                Interrogação
+            </div>
+            <div class="quadrant-subtitle interrogacao">Testar Estratégias</div>
+        </div>
+
+        <div class="quadrant-stats">
+            <div class="stat-box">
+                <div class="stat-value">51</div>
+                <div class="stat-label">Categorias</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">288</div>
+                <div class="stat-label">Unidades</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">0.14</div>
+                <div class="stat-label">Score Médio</div>
+            </div>
+        </div>
+
+        <div class="divider interrogacao"></div>
+
+        <div class="metric-item" style="margin-bottom: 20px;">
+            <div class="metric-label">Valor Total em Estoque</div>
+            <div class="metric-value">R$ 6.884,37</div>
+        </div>
+
+        <div class="insight-box">
+            <div class="insight-label interrogacao">🧠 Estratégia Recomendada</div>
+            <div class="insight-text">
+                Produtos com alto potencial mas baixa participação. Requerem investimento controlado para validação de mercado antes de escalar.
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button class="action-button interrogacao">📊 Ver Todas as 51 Categorias</button>
+        </div>
+    </div>
+
+    <!-- Card Individual - Creme Facial (Estrela) -->
+    <div class="card product-card">
+        <div class="stock-tooltip estrela">
+            <div class="stock-line"><strong>320 unid.</strong> em estoque</div>
+            <div class="stock-line">Valor: <strong>R$ 4.912,00</strong></div>
+        </div>
+
+        <div class="product-header">
+            <div>
+                <div class="product-title">Creme Facial</div>
+                <div class="score-badge">Score: 0.487</div>
+            </div>
+            <div class="quadrant-badge estrela">⭐ Estrela Digital</div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-item">
+                <div class="metric-label">Market Share</div>
+                <div class="metric-value small">13.9%</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Crescimento</div>
+                <div class="metric-value small growth-hyper">1000%</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Preço Médio</div>
+                <div class="metric-value small">R$ 15,35</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">Vendas</div>
+                <div class="metric-value small">4923</div>
+            </div>
+        </div>
+
+        <div class="insight-box estrela">
+            <div class="insight-label estrela">🧠 Insight-Chave</div>
+            <div class="insight-text">
+                🔥 Hiper-Crescimento (1000%): Dobrar foco em estoque e marketing para capturar a demanda.
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Quadrante - Estrela Digital -->
+    <div class="card quadrant-card estrela">
+        <div class="stock-tooltip estrela">
+            <div class="stock-line"><strong>2930 unid.</strong> em estoque</div>
+            <div class="stock-line">Valor: <strong>R$ 49.936,82</strong></div>
+        </div>
+
+        <div class="quadrant-header">
+            <div class="quadrant-title">
+                <span class="quadrant-icon estrela">⭐</span>
+                Estrela Digital
+            </div>
+            <div class="quadrant-subtitle estrela">Investir Pesado</div>
+        </div>
+
+        <div class="quadrant-stats">
+            <div class="stat-box">
+                <div class="stat-value">37</div>
+                <div class="stat-label">Categorias</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">2930</div>
+                <div class="stat-label">Unidades</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">0.20</div>
+                <div class="stat-label">Score Médio</div>
+            </div>
+        </div>
+
+        <div class="divider estrela"></div>
+
+        <div class="metric-item" style="margin-bottom: 20px;">
+            <div class="metric-label">Valor Total em Estoque</div>
+            <div class="metric-value">R$ 49.936,82</div>
+        </div>
+
+        <div class="insight-box">
+            <div class="insight-label estrela">🧠 Estratégia Recomendada</div>
+            <div class="insight-text">
+                Produtos com alta participação e crescimento explosivo. Prioridade máxima para investimento em estoque, marketing e expansão de SKUs.
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button class="action-button estrela">📊 Ver Todas as 37 Categorias</button>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insight Expert - Metodologia de Rentabilidade</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0F172A;
+            color: #F1F5F9;
+            line-height: 1.6;
+        }
+
+        /* Print Settings */
+        @media print {
+            body { margin: 0; padding: 0; background: white; color: black; }
+            .page { page-break-after: always; margin: 0; box-shadow: none; border: none; background: white; }
+            .bg-gradient { display: none; }
+            .cover-title { -webkit-text-fill-color: black; }
+            td, th { color: black !important; border-color: #ddd !important; }
+            code { color: #333 !important; background: #eee !important; border: none !important; }
+            h1, h2, h3 { color: #000 !important; }
+            .alert-box, .success-box, .info-box { border: 1px solid #ccc; background: #fff !important; }
+        }
+
+        /* Page Container */
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto 20px;
+            background: #0F172A;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .page-content { padding: 20mm; position: relative; z-index: 1; }
+
+        /* Background Effects */
+        .bg-gradient {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 30% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        /* Cover Page */
+        .cover {
+            display: flex; flex-direction: column; justify-content: space-between;
+            align-items: center; text-align: center; height: 257mm;
+        }
+
+        .cover-logo {
+            font-weight: 900; font-size: 28px; color: #fff; letter-spacing: -1px; margin-top: 40px;
+            background: linear-gradient(135deg, #A855F7 0%, #EC4899 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .cover-main { flex: 1; display: flex; flex-direction: column; justify-content: center; max-width: 650px; }
+
+        .cover-badge {
+            display: inline-block; padding: 8px 20px;
+            background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.4);
+            border-radius: 24px; font-size: 12px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px; color: #D8B4FE; margin-bottom: 32px;
+        }
+
+        .cover-title {
+            font-size: 42px; font-weight: 900; line-height: 1.1;
+            background: linear-gradient(135deg, #E2E8F0 0%, #94A3B8 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 24px;
+        }
+
+        .cover-subtitle { font-size: 16px; color: #94A3B8; line-height: 1.6; margin-bottom: 48px; }
+        .cover-footer { width: 100%; padding-top: 32px; border-top: 1px solid rgba(148, 163, 184, 0.1); color: #64748B; font-size: 11px; }
+
+        /* Header & Footer */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: 16px; border-bottom: 1px solid rgba(148, 163, 184, 0.1); margin-bottom: 32px;
+        }
+        .header-title { font-size: 10px; color: #64748B; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .footer {
+            position: absolute; bottom: 20mm; left: 20mm; right: 20mm;
+            display: flex; justify-content: space-between; align-items: center;
+            padding-top: 16px; border-top: 1px solid rgba(148, 163, 184, 0.1); color: #64748B; font-size: 10px;
+        }
+
+        /* Typography */
+        h1 { font-size: 26px; font-weight: 800; color: #F8FAFC; margin-bottom: 16px; letter-spacing: -0.5px; }
+        h2 { font-size: 18px; font-weight: 700; color: #E879F9; margin-top: 32px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        h3 { font-size: 14px; font-weight: 600; color: #E2E8F0; margin-top: 24px; margin-bottom: 12px; border-left: 3px solid #C084FC; padding-left: 10px; }
+        p { font-size: 12px; color: #CBD5E1; margin-bottom: 12px; text-align: justify; }
+        strong { color: #F1F5F9; font-weight: 600; }
+        
+        code {
+            font-family: 'JetBrains Mono', monospace; background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2); padding: 2px 6px; border-radius: 4px;
+            color: #E879F9; font-size: 10px;
+        }
+
+        /* Math Block */
+        .math-block {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #E2E8F0;
+            text-align: center;
+        }
+        .math-var { color: #F472B6; }
+        .math-op { color: #94A3B8; }
+
+        /* Technical Table */
+        .tech-table {
+            width: 100%; border-collapse: separate; border-spacing: 0; margin: 16px 0;
+            border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 8px; overflow: hidden; font-size: 11px;
+        }
+        .tech-table th {
+            background: #1E293B; padding: 10px 14px; text-align: left; font-weight: 600;
+            color: #94A3B8; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        .tech-table td { padding: 10px 14px; color: #CBD5E1; border-bottom: 1px solid rgba(148, 163, 184, 0.1); vertical-align: top; }
+        .tech-table tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
+
+        /* Tags */
+        .source-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; margin-right: 6px; text-transform: uppercase; }
+        .tag-input { background: rgba(56, 189, 248, 0.15); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .tag-logic { background: rgba(236, 72, 153, 0.15); color: #F472B6; border: 1px solid rgba(236, 72, 153, 0.3); }
+        .tag-output { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        /* Alert Boxes */
+        .box { padding: 12px 16px; margin: 16px 0; border-radius: 0 6px 6px 0; font-size: 11px; }
+        .alert-box { background: rgba(244, 63, 94, 0.1); border-left: 3px solid #F43F5E; }
+        .alert-title { color: #F43F5E; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; font-size: 10px; }
+        .info-box { background: rgba(168, 85, 247, 0.1); border-left: 3px solid #A855F7; }
+        .info-title { color: #A855F7; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; font-size: 10px; }
+
+    </style>
+</head>
+<body>
+
+    <!-- PAGE 1: COVER -->
+    <div class="page">
+        <div class="bg-gradient"></div>
+        <div class="page-content">
+            <div class="cover">
+                <div class="cover-logo">Insight Expert</div>
+                
+                <div class="cover-main">
+                    <span class="cover-badge">Metodologia Financeira</span>
+                    <h1 class="cover-title">Cálculo de Lucro &<br>Margem de Rentabilidade</h1>
+                    <p class="cover-subtitle">
+                        Mapeamento algorítmico das funções <code>create_profitability_chart</code> e <code>create_profitability_margin_chart</code> do módulo de visualização.
+                    </p>
+                </div>
+
+                <div class="cover-footer">
+                    <div>Módulo: utils/charts.py</div>
+                    <div style="margin-top: 8px;">Versão do Código: 2.1 • Homologado</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 2: CONCEITOS -->
+    <div class="page">
+        <div class="bg-gradient"></div>
+        <div class="page-content">
+            <div class="header">
+                <span style="font-weight:900; color:#fff">INSIGHT EXPERT</span>
+                <span class="header-title">Definições Técnicas</span>
+            </div>
+
+            <h1>Conceito de Rentabilidade no Painel</h1>
+            <p>
+                Diferente de sistemas contábeis tradicionais que calculam o lucro "nota a nota", o painel utiliza uma 
+                <strong>abordagem analítica por categoria</strong>. Isso permite identificar rapidamente quais linhas de produtos 
+                estão drenando recursos operacionais, considerando não apenas o custo da mercadoria, mas também o peso logístico e cancelamentos.
+            </p>
+
+            <div class="info-box box">
+                <div class="info-title">Abordagem Estatística</div>
+                <p>
+                    O cálculo aplica a taxa de cancelamento média da categoria sobre a receita total acumulada, em vez de filtrar pedidos individualmente. 
+                    Isso oferece uma visão ponderada do risco de cada categoria.
+                </p>
+            </div>
+
+            <h2>Variáveis de Entrada</h2>
+            <p>Os dados brutos são pré-processados pelo <code>magazord_pipeline</code> antes de entrar no motor de cálculo:</p>
+
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th width="20%">Variável (Python)</th>
+                        <th width="30%">Origem do Dado</th>
+                        <th width="50%">Definição</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>price</code></td>
+                        <td><span class="source-tag tag-input">ERP</span> <code>valorTotal</code></td>
+                        <td>Volume Bruto de Vendas (GMV) acumulado para a categoria no período.</td>
+                    </tr>
+                    <tr>
+                        <td><code>freight_value</code></td>
+                        <td><span class="source-tag tag-input">ERP</span> <code>valorFrete</code></td>
+                        <td>Custo total de frete repassado ou subsidiado nos pedidos da categoria.</td>
+                    </tr>
+                    <tr>
+                        <td><code>pedido_cancelado</code></td>
+                        <td><span class="source-tag tag-input">ERP</span> <code>Status Code</code></td>
+                        <td>
+                            Taxa de insucesso calculada como média (0.0 a 1.0).<br>
+                            <em>Ex: 0.05 significa que 5% dos pedidos da categoria são cancelados.</em>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="footer">
+                <span>Insight Expert • Confidencial</span>
+                <span>Página 2</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 3: FÓRMULAS -->
+    <div class="page">
+        <div class="bg-gradient"></div>
+        <div class="page-content">
+            <div class="header">
+                <span style="font-weight:900; color:#fff">INSIGHT EXPERT</span>
+                <span class="header-title">Algoritmos de Cálculo</span>
+            </div>
+
+            <h1>1. Cálculo de Lucro Operacional</h1>
+            <p>Implementado na função <code>create_profitability_chart</code> (linhas 1078-1139).</p>
+
+            <h3>Lógica Matemática</h3>
+            <p>O lucro é definido como a Receita Efetiva (descontando a probabilidade de cancelamento) subtraída do Custo de Frete.</p>
+
+            <div class="math-block">
+                <span class="math-var">Profit</span> = 
+                (<span class="math-var">Price</span> × (1 - <span class="math-var">CancelRate</span>)) - <span class="math-var">Freight</span>
+            </div>
+
+            <h3>Exemplo Prático</h3>
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th>Cenário</th>
+                        <th>Valores</th>
+                        <th>Cálculo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Categoria "Vestidos"</td>
+                        <td>
+                            Vendas: R$ 100.000<br>
+                            Frete: R$ 15.000<br>
+                            Taxa Cancel: 10% (0.10)
+                        </td>
+                        <td>
+                            1. Receita Efetiva: 100k * (1 - 0.1) = 90k<br>
+                            2. Lucro: 90k - 15k = <strong>R$ 75.000</strong>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="margin-top: 40px;"></div>
+
+            <h1>2. Cálculo de Margem (%)</h1>
+            <p>Implementado na função <code>create_profitability_margin_chart</code> (linhas 1202-1293).</p>
+
+            <h3>Lógica Matemática</h3>
+            <p>A margem representa a eficiência da categoria, ou seja, quanto sobra de cada R$ 1,00 vendido.</p>
+
+            <div class="math-block">
+                <span class="math-var">Margin %</span> = 
+                (<span class="math-var">Profit</span> ÷ <span class="math-var">Price</span>) × 100
+            </div>
+
+            <div class="alert-box box">
+                <div class="alert-title">Nota sobre Denominador</div>
+                <p>
+                    A divisão é feita sobre a Receita Bruta (<code>price</code>), não sobre a Receita Líquida. 
+                    Isso penaliza categorias com alto cancelamento ou frete caro, mostrando uma margem real sobre o esforço de venda total.
+                </p>
+            </div>
+
+            <h3>Validação de Código</h3>
+            <p>Trecho extraído diretamente de <code>utils/charts.py</code> para auditoria:</p>
+            
+            <div style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(148,163,184,0.2); border-radius:8px; padding:12px; margin-top:10px;">
+                <code style="background:none; border:none; color:#CBD5E1; font-size:10px; display:block; white-space:pre;">
+# Calcular lucro líquido (Linha 1232)
+category_metrics['profit'] = (
+    category_metrics['price'] * (1 - category_metrics['pedido_cancelado']) 
+    - category_metrics['freight_value']
+)
+
+# Calcular margem (Linha 1238)
+category_metrics['margin_percentage'] = (
+    (category_metrics['profit'] / category_metrics['price'] * 100)
+    .fillna(0)
+)
+                </code>
+            </div>
+
+            <div class="footer">
+                <span>Insight Expert • Confidencial</span>
+                <span>Página 3</span>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

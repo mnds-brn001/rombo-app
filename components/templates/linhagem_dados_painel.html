@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insight Expert - Documentação de Métricas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0F172A;
+            color: #F1F5F9;
+            line-height: 1.6;
+        }
+
+        /* Print Settings */
+        @media print {
+            body { margin: 0; padding: 0; background: white; color: black; }
+            .page { page-break-after: always; margin: 0; box-shadow: none; border: none; background: white; }
+            .bg-gradient { display: none; }
+            .cover-title { -webkit-text-fill-color: black; }
+            td, th { color: black !important; border-color: #ddd !important; }
+            code { color: #333 !important; background: #eee !important; border: none !important; }
+            h1, h2, h3 { color: #000 !important; }
+            .alert-box, .success-box, .info-box { border: 1px solid #ccc; background: #fff !important; }
+        }
+
+        /* Page Container */
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto 20px;
+            background: #0F172A;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .page-content { padding: 20mm; position: relative; z-index: 1; }
+
+        /* Background Effects */
+        .bg-gradient {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 30% 20%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(14, 165, 233, 0.05) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        /* Cover Page */
+        .cover {
+            display: flex; flex-direction: column; justify-content: space-between;
+            align-items: center; text-align: center; height: 257mm;
+        }
+
+        .cover-logo {
+            font-weight: 900; font-size: 28px; color: #fff; letter-spacing: -1px; margin-top: 40px;
+            background: linear-gradient(135deg, #06B6D4 0%, #38BDF8 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .cover-main { flex: 1; display: flex; flex-direction: column; justify-content: center; max-width: 650px; }
+
+        .cover-badge {
+            display: inline-block; padding: 8px 20px;
+            background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.4);
+            border-radius: 24px; font-size: 12px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px; color: #22D3EE; margin-bottom: 32px;
+        }
+
+        .cover-title {
+            font-size: 42px; font-weight: 900; line-height: 1.1;
+            background: linear-gradient(135deg, #E2E8F0 0%, #94A3B8 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 24px;
+        }
+
+        .cover-subtitle { font-size: 16px; color: #94A3B8; line-height: 1.6; margin-bottom: 48px; }
+        .cover-footer { width: 100%; padding-top: 32px; border-top: 1px solid rgba(148, 163, 184, 0.1); color: #64748B; font-size: 11px; }
+
+        /* Headers & Footers */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: 16px; border-bottom: 1px solid rgba(148, 163, 184, 0.1); margin-bottom: 32px;
+        }
+        .header-title { font-size: 10px; color: #64748B; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .footer {
+            position: absolute; bottom: 20mm; left: 20mm; right: 20mm;
+            display: flex; justify-content: space-between; align-items: center;
+            padding-top: 16px; border-top: 1px solid rgba(148, 163, 184, 0.1); color: #64748B; font-size: 10px;
+        }
+
+        /* Typography */
+        h1 { font-size: 26px; font-weight: 800; color: #F8FAFC; margin-bottom: 16px; letter-spacing: -0.5px; }
+        h2 { font-size: 18px; font-weight: 700; color: #38BDF8; margin-top: 32px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        h3 { font-size: 14px; font-weight: 600; color: #E2E8F0; margin-top: 24px; margin-bottom: 12px; border-left: 3px solid #0EA5E9; padding-left: 10px; }
+        p { font-size: 12px; color: #CBD5E1; margin-bottom: 12px; text-align: justify; }
+        strong { color: #F1F5F9; font-weight: 600; }
+        
+        code {
+            font-family: 'JetBrains Mono', monospace; background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2); padding: 2px 6px; border-radius: 4px;
+            color: #A5B4FC; font-size: 10px;
+        }
+
+        /* Technical Table */
+        .tech-table {
+            width: 100%; border-collapse: separate; border-spacing: 0; margin: 16px 0;
+            border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 8px; overflow: hidden; font-size: 11px;
+        }
+        .tech-table th {
+            background: #1E293B; padding: 10px 14px; text-align: left; font-weight: 600;
+            color: #94A3B8; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        .tech-table td { padding: 10px 14px; color: #CBD5E1; border-bottom: 1px solid rgba(148, 163, 184, 0.1); vertical-align: top; }
+        .tech-table tr:last-child td { border-bottom: none; }
+        .tech-table tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
+
+        /* Tags */
+        .source-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; margin-right: 6px; text-transform: uppercase; }
+        .tag-erp { background: rgba(234, 179, 8, 0.15); color: #FACC15; border: 1px solid rgba(234, 179, 8, 0.3); } /* Source */
+        .tag-calc { background: rgba(56, 189, 248, 0.15); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.3); } /* Logic */
+        .tag-kpi { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); } /* Final */
+        .tag-param { background: rgba(168, 85, 247, 0.15); color: #C084FC; border: 1px solid rgba(168, 85, 247, 0.3); } /* Input */
+
+        /* Flow Diagram */
+        .flow-diagram {
+            display: flex; align-items: center; justify-content: space-between;
+            margin: 24px 0; padding: 16px; background: rgba(30, 41, 59, 0.5);
+            border-radius: 12px; border: 1px dashed rgba(148, 163, 184, 0.3);
+        }
+        .flow-step { text-align: center; flex: 1; position: relative; }
+        .flow-step::after { content: "→"; position: absolute; right: -10px; top: 50%; transform: translateY(-50%); color: #64748B; font-size: 16px; }
+        .flow-step:last-child::after { content: none; }
+        .flow-icon { font-size: 20px; margin-bottom: 6px; display: block; }
+        .flow-label { font-size: 10px; color: #94A3B8; text-transform: uppercase; font-weight: 700; }
+
+        /* Alert Boxes */
+        .box { padding: 12px 16px; margin: 16px 0; border-radius: 0 6px 6px 0; font-size: 11px; }
+        .alert-box { background: rgba(244, 63, 94, 0.1); border-left: 3px solid #F43F5E; }
+        .alert-title { color: #F43F5E; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; font-size: 10px; }
+        
+        .success-box { background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10B981; }
+        .success-title { color: #10B981; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; font-size: 10px; }
+        
+        .info-box { background: rgba(56, 189, 248, 0.1); border-left: 3px solid #38BDF8; }
+        .info-title { color: #38BDF8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; font-size: 10px; }
+
+    </style>
+</head>
+<body>
+
+    <!-- PAGE 1: COVER -->
+    <div class="page">
+        <div class="bg-gradient"></div>
+        <div class="page-content">
+            <div class="cover">
+                <div class="cover-logo">Insight Expert</div>
+                
+                <div class="cover-main">
+                    <span class="cover-badge">Auditoria de Dados</span>
+                    <h1 class="cover-title">Dicionário de Métricas &<br>Linhagem de Dados</h1>
+                    <p class="cover-subtitle">
+                        Documentação técnica completa da origem, transformação e cálculo de todos os KPIs do painel, rastreados desde a API do ERP até a visualização final.
+                    </p>
+                </div>
+
+                <div class="cover-footer">
+                    <div>Homologado para: Dica de Madame</div>
+                    <div style="margin-top: 8px;">Gerado em: Janeiro 2026 • Ref: utils/KPIs.py</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 2: ARQUITETURA -->
+    <div class="page">
+        <div class="bg-gradient"></div>
+        <div class="page-content">
+            <div class="header">
+                <span style="font-weight:900; color:#fff">INSIGHT EXPERT</span>
+                <span class="header-title">Fluxo de Dados</span>
+            </div>
+
+            <h1>Arquitetura de Processamento</h1>
+            <p>
+                O painel opera sobre um Data Lakehouse estruturado. Os dados não são inseridos manualmente; eles fluem automaticamente do ERP através de conectores seguros.
+            </p>
+
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <span class="flow-icon">🔌</span>
+                    <div class="flow-label">1. Fonte</div>
+                    <div style="font-size:9px; color:#64748B">Magazord API</div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-icon">📥</span>
+                    <div class="flow-label">2. Ingestão</div>
+                    <div style="font-size:9px; color:#64748B">Conectores.py</div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-icon">⚙️</span>
+                    <div class="flow-label">3. Transform</div>
+                    <div style="font-size:9px; color:#64748B">Pipeline ETL</div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-icon">📐</span>
+                    <div class="flow-label">4. Cálculo</div>
+                    <div style="font-size:9px; color:#64748B">KPIs.py</div>
+                </div>
+                <div class="flow-step">
+                    <span class="flow-icon">📊</span>
+                    <div class="flow-label">5. View</div>
+                    <div style="font-size:9px; color:#64748B">Dashboard</div>
+                </div>
+            </div>
+
+            <h2>Regras de Elegibilidade Global</h2>
+            <p>Antes de qualquer cálculo, os dados brutos passam por um filtro de qualidade em <code>calculate_kpis</code> e <code>calculate_acquisition_retention_kpis</code>.</p>
+            
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th>Regra de Negócio</th>
+                        <th>Implementação Técnica</th>
+                        <th>Arquivo Ref.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Status Aprovado</strong></td>
+                        <td>
+                            Code IN [4, 5, 6, 7, 8, 12, 19, 23, 26, 27, 29, 30]<br>
+                            <em>(Aprovado, Faturado, Enviado, Entregue)</em>
+                        </td>
+                        <td><code>KPIs.py</code> (L661)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Remoção de Cancelados</strong></td>
+                        <td><code>pedido_cancelado == 0</code> (Codes 2, 14, 24)</td>
+                        <td><code>KPIs.py</code> (L628)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Exclusão de Anomalias</strong></td>
+                        <td>Exclui explicitamente Fraudes (9), Chargebacks (10) e Disputas (11).</td>
+                        <td><code>transformers.py</code> (L59)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="success-box box">
+                <div class="success-title">Integridade Garantida</div>
+                <p>
+                    O pipeline verifica automaticamente a integridade dos tipos de dados (ex: converte strings monetárias para decimal) 
+                    e descarta registros corrompidos antes de salvar no Data Lake (<code>pipeline.py</code> L159).
+                </p>
+            </div>
+
+            <div class="footer">
+                <span>Insight Expert • Confidencial</span>
+                <span>Página 2</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 3: FINANCEIRO E VENDAS -->
+    <div class="page">
+        <div class="bg-gradient"></div>
+        <div class="page-content">
+            <div class="header">
+                <span style="font-weight:900; color:#fff">INSIGHT EXPERT</span>
+                <span class="header-title">KPIs Financeiros</span>
+            </div>
+
+            <h1>Vendas e Receita</h1>
+            <p>Métricas calculadas pela função <code>calculate_kpis</code>.</p>
+
+            <h3>1. Receita (Revenue)</h3>
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th width="25%">Métrica</th>
+                        <th width="35%">Fonte (Magazord)</th>
+                        <th width="40%">Lógica de Cálculo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Receita Bruta</strong></td>
+                        <td><code>valorTotal</code></td>
+                        <td>Soma simples do valor total dos pedidos elegíveis.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Receita Líquida</strong><br><span style="font-size:9px; color:#A5B4FC">(KPI Principal)</span></td>
+                        <td><code>valorItem</code>, <code>valorFrete</code>, <code>valorDesconto</code></td>
+                        <td>
+                            <span class="source-tag tag-calc">Fórmula</span><br>
+                            <code>(Soma Itens + Frete) - (Descontos + Vouchers)</code><br>
+                            Calculado linha a linha para precisão fiscal.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ticket Médio</strong></td>
+                        <td>Derivado</td>
+                        <td><code>Receita Líquida / Total Pedidos</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Receita Perdida</strong></td>
+                        <td><code>price</code> (em pedidos cancelados)</td>
+                        <td>Soma do valor de pedidos onde <code>pedido_cancelado == 1</code>.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2. Operacional</h3>
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th width="25%">Métrica</th>
+                        <th width="35%">Fonte</th>
+                        <th width="40%">Regra</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Total Pedidos</strong></td>
+                        <td><code>id</code></td>
+                        <td><code>COUNT(DISTINCT id)</code> (apenas status válidos).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Taxa Cancelamento</strong></td>
+                        <td><code>pedidoSituacao</code></td>
+                        <td><code>Média(pedido_cancelado)</code> sobre o total de pedidos iniciados.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Taxa de Abandono</strong></td>
+                        <td><code>carrinho_abandonado</code></td>
+                        <td>
+                            <code>Carrinhos Abandonados / Total Oportunidades</code><br>
+                            Extraído do endpoint <code>/site/carrinho</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tempo Entrega</strong></td>
+                        <td><code>dataHora</code> vs <code>dataEntrega</code></td>
+                        <td>Média de dias entre Compra e Entrega Efetiva.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box box">
+                <div class="info-title">Tratamento de Frete</div>
+                <p>
+                    O valor do frete é considerado receita bruta operacional (GMV), mas é segregado para análises de margem 
+                    se o custo logístico estiver disponível no ERP.
+                </p>
+            </div>
+
+            <div class="footer">
+                <span>Insight Expert • Confidencial</span>
+                <span>Página 3</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 4: AQUISIÇÃO E RETENÇÃO -->
+    <div class="page">
+        <div class="bg-gradient"></div>
+        <div class="page-content">
+            <div class="header">
+                <span style="font-weight:900; color:#fff">INSIGHT EXPERT</span>
+                <span class="header-title">Growth & Cliente</span>
+            </div>
+
+            <h1>Aquisição e Retenção (LTV/CAC)</h1>
+            <p>Métricas calculadas pela função <code>calculate_acquisition_retention_kpis</code>. Utiliza identificação única por CPF/Email.</p>
+
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th width="25%">Métrica</th>
+                        <th width="35%">Parâmetros / Fonte</th>
+                        <th width="40%">Algoritmo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Novos Clientes</strong></td>
+                        <td><code>customer_unique_id</code>, <code>data_compra</code></td>
+                        <td>
+                            Cliente cujo <code>MIN(data_compra)</code> ocorre no período analisado.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Taxa de Recompra</strong></td>
+                        <td>Histórico Completo</td>
+                        <td>
+                            <span class="source-tag tag-calc">DuckDB SQL</span><br>
+                            <code>(Clientes com > 1 pedido) / (Total Clientes Únicos)</code>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tempo p/ 2ª Compra</strong></td>
+                        <td><code>data_compra</code></td>
+                        <td>
+                            Média de dias entre o 1º e o 2º pedido (para quem recomprou).
+                            <br><em>Ignora recompras no mesmo dia.</em>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>CAC</strong></td>
+                        <td><span class="source-tag tag-param">Input Externo</span></td>
+                        <td><code>Verba Marketing / Novos Clientes</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>LTV (Lifetime Value)</strong></td>
+                        <td>Histórico de Receita</td>
+                        <td><code>Receita Total Acumulada / Total Clientes Únicos</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>LTV/CAC Ratio</strong></td>
+                        <td>Derivado</td>
+                        <td>Indicador de saúde financeira. Ideal > 3.0.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Previsão de Receita (Forecast)</h3>
+            <p>Calculado em <code>calculate_revenue_forecast</code> usando modelos estatísticos.</p>
+            <ul style="font-size:12px; color:#CBD5E1; margin-left:20px; margin-bottom:20px;">
+                <li><strong>Base:</strong> Média móvel de 7 dias da receita.</li>
+                <li><strong>Sazonalidade:</strong> Fator calculado para cada dia da semana (ex: Domingo vende menos, Terça vende mais).</li>
+                <li><strong>Tendência:</strong> Regressão linear (Polyfit Grau 1) sobre os últimos 30 dias.</li>
+            </ul>
+
+            <div class="footer">
+                <span>Insight Expert • Confidencial</span>
+                <span>Página 4</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 5: PRODUTOS E RANKING -->
+    <div class="page">
+        <div class="bg-gradient"></div>
+        <div class="page-content">
+            <div class="header">
+                <span style="font-weight:900; color:#fff">INSIGHT EXPERT</span>
+                <span class="header-title">Performance de Produto</span>
+            </div>
+
+            <h1>Análise de Catálogo</h1>
+            <p>Algoritmos de classificação de produtos e categorias definidos em <code>calculate_product_metrics</code> e <code>calculate_sku_metrics</code>.</p>
+
+            <h3>Algoritmo de Ranking (Score Composto)</h3>
+            <p>Para evitar viés de analisar apenas Volume ou apenas Faturamento, utilizamos um Score Ponderado para definir "Top Produtos".</p>
+            
+            <div class="alert-box box" style="background: rgba(168, 85, 247, 0.1); border-color: #A855F7;">
+                <div class="alert-title" style="color: #A855F7;">Fórmula do Score SKU</div>
+                <code style="display:block; margin-top:8px; background:none; border:none; padding:0; color:#E9D5FF;">
+                    Score = (0.4 × Receita Norm) + (0.3 × Vendas Norm) + (0.2 × Rating/5) + (0.1 × (1 - TaxaCancel))
+                </code>
+                <p style="margin-top:8px;">
+                    Isso garante que um produto que vende muito mas tem alto cancelamento ou nota ruim perca posições no ranking.
+                </p>
+            </div>
+
+            <h3>Métricas de Categoria</h3>
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th>Indicador</th>
+                        <th>Regra / Fonte</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Lucratividade (Profit)</strong></td>
+                        <td>
+                            Se <code>custoMedio</code> não disponível no ERP, o sistema utiliza uma 
+                            <span class="source-tag tag-param">Margem Simulada</span> de 30% (Configurável em KPIs.py L1080).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Crescimento</strong></td>
+                        <td>
+                            Comparativo: (Vendas Último Mês - Vendas Primeiro Mês) / Vendas Primeiro Mês.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sazonalidade</strong></td>
+                        <td>Agregação de vendas por <code>Day Name</code> e <code>Month Name</code>.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Auditoria de Estoque</h3>
+            <p>Origem: Endpoint <code>/listEstoque</code> (V1).</p>
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Mapeamento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>stock_level</code></td>
+                        <td><code>quantidadeDisponivelVenda</code> (Já desconta reservas e bloqueios).</td>
+                    </tr>
+                    <tr>
+                        <td><code>cost_price</code></td>
+                        <td><code>custoMedio</code> ou <code>custoVirtual</code> (Fallback).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="footer">
+                <span>Insight Expert • Confidencial</span>
+                <span>Página 5</span>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

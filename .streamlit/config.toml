@@ -1,0 +1,27 @@
+[theme]
+primaryColor = "#6366f1"
+backgroundColor = "#0a0e1a"
+secondaryBackgroundColor = "#1e293b"
+textColor = "#e2e8f0"
+font = "Inter"
+
+[glass_theme]
+cardBackground = "rgba(255, 255, 255, 0.1)"
+cardBorder = "rgba(255, 255, 255, 0.3)"
+cardShadow = "rgba(0, 0, 0, 0.1)"
+cardBlur = "10px"
+cardBorderRadius = "20px"
+cardPadding = "25px"
+
+[background_theme]
+radialGradient = "radial-gradient(ellipse at center, rgba(15, 23, 42, 0.95) 0%, rgba(10, 14, 26, 0.98) 40%, rgba(5, 8, 15, 1) 100%)"
+diagonalPattern = "repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(30, 41, 59, 0.15) 2px, rgba(30, 41, 59, 0.15) 4px)"
+metallicOverlay = "linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.02) 25%, rgba(59, 130, 246, 0.03) 50%, rgba(99, 102, 241, 0.02) 75%, rgba(139, 92, 246, 0.03) 100%)"
+texturePattern = "repeating-linear-gradient(-45deg, transparent, transparent 1px, rgba(255, 255, 255, 0.01) 1px, rgba(255, 255, 255, 0.01) 2px)"
+
+[colors]
+primary = "#1f77b4"
+success = "#2ecc71"
+warning = "#f1c40f"
+danger = "#e74c3c"
+info = "#3498db"

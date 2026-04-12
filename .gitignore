@@ -1,0 +1,183 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Ambiente Virtual
+venv*/
+insightxenv/
+.env
+.venv
+env/
+ENV/
+.venv312/
+venv312/
+
+# Arquivos de Dados (Lixo / Local)
+data/
+*.parquet
+*.jsonl
+*.csv
+*.xlsx
+*.xls
+
+# Arquivos grandes específicos
+olist_geolocation_dataset.csv
+olist_merged_data.csv
+olist_merged_data_5_linhas.csv
+olist_merged_data_5_linhas.xlsx
+
+# Perfis de Navegador e Cache (CRÍTICO)
+.pw_shopee_profile/
+chrome_debug_profile/
+BrowserMetrics/
+
+# Outros
+.DS_Store
+*.log
+.ipynb_checkpoints
+.vscode/
+.idea/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Outros arquivos
+# tests/  # Comentado para permitir .tests/
+README.md
+stubs/
+.mypy_cache/
+.mypy_cache/
+mypy_cache/
+.devcontainer/
+.pytest_cache/
+.pytest_cache/
+pytest_cache/
+htmlcov/
+
+# Pastas adicionais para ignorar
+schemas/
+utils/mcp_server/
+ecommerce-data-project - Pipeline, Code Monitor New UIX Testing/
+ecommerce-data-project clean original repo clone plus addon churn model/
+
+# Arquivos adicionais para ignorar
+analisar_clientes.py
+as\ pd
+debug_pipeline_completo.py
+debug_pipeline.py
+estrategia_linkedin_ecommerce_analytics.md
+Exportar Consulta.csv
+Exportar Consulta*.csv
+redis-installer.msi
+RESTORATION_SUMMARY.md
+test_mcp_integration.py
+verificar_cancelamentos.py
+verificar_datas_entrega.py
+
+
+verificar_resultado.py
+teste_pipeline.py
+teste_pipeline.py
+teste_final_pipeline
+
+forecast_models/
+insightx-ecommerce-dashboard/
+kaggle_data/
+analise_outliers_olist.py
+relatorio_outliers_detalhado.md
+README_PUBLIC.md
+temp/
+tools/
+dados_amazon/
+dados_superstore/
+forecast-atualizado/
+forecast-comparison-plots/
+insightx-ecommerce-dashboard-development/
+GTM_STRATEGY_OPTIMIZATION.md
+linkedin-1month-posts.txt
+PLANO_ACAO_FUNIL_PEDIDOS.md
+RESUMO_IMPLEMENTACAO_FUNIL.md
+medium-1month-articles.txt
+LINKEDIN_GTM_MONTH2_STRATEGY.md
+demo_pedidos.csv
+AI_AGENTS_IMPLEMENTATION.md
+AI_AGENTS_IMPLEMENTATION_PROMPT.md
+analise_impacto_modelos_preditivos.md
+ANALISE_RECOMENDACOES_ESTOQUE.md
+ANJUSS_INTEGRACAO_ERP_MARKETPLACE.md
+ANJUSS_REQUISITOS_TECNICOS.md
+apresentacao_anjuss_insightx.html
+apresentacao_anjuss_insightx.md
+apresentacao_anjuss_simples.html
+automated_data_collection.py
+big-data-implementation.md
+BRIEFING_INTEGRACAO.md
+casos_de_uso_apresentacao.md
+CASOS_DE_USO_OLIST.md
+CHANGELOG_DASHBOARD_IMPROVEMENTS.md
+COMPARACAO_DATASETS_METRICAS.md
+CORRECAO_CARDS_RECOMENDACOES.md
+cta_melhorado.md
+dashboard_impacto_modelos.py
+data_requirements_funnel_spec.md
+demo_stock_forecast_comparison.py
+email_anjuss_bruno.md
+email_anjuss_final.md
+evaluate_forecast_metrics_comprehensive.py
+exemplo_adaptacao_cliente.py
+FLORICULTURA_TECH_SPEC.md
+FULFILLSIGHT_LOGISTICS_TECH_SPEC.md
+gerar_pdf_apresentacao.py
+GTM_pricing_estrategia.md
+GUIA_ADAPTACAO_NOVO_CLIENTE.md
+MAINTENANCE_GUIDE.md
+PROCEDIMENTO_ADAPTACAO_CLIENTE.md
+project_structure.yaml
+RESULTADOS_METRICAS_COMPLETAS.md
+RESULTADOS_POR_CATEGORIA.md
+RESUMO_DATASET_OLIST.md
+resumo_executivo_impacto.md
+RESUMO_METRICAS_PREVISAO.md
+RESUMO_MODELOS_ML.md
+ROADMAP_JAVASCRIPT_EVOLUTION.md
+SISTEMA_CACHE_INTELIGENTE_RESUMO.md
+
+docs/
+.streamlit/secrets.toml

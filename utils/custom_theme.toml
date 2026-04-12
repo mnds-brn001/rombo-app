@@ -1,0 +1,14 @@
+[glass_theme]
+cardBackground = "rgba(30, 41, 59, 0.7)"
+cardBorder = "rgba(99, 102, 241, 0.3)"
+cardShadow = "rgba(0, 0, 0, 0.2)"
+cardBlur = "12px"
+cardBorderRadius = "20px"
+cardPadding = "25px"
+
+[colors]
+primary = "#6366f1"
+success = "#10b981"
+warning = "#f59e0b"
+danger = "#ef4444"
+info = "#3b82f6" 

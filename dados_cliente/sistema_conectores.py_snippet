@@ -1,0 +1,80 @@
+
+    @retry_with_backoff(max_retries=3, exceptions=(requests.RequestException,))
+    def get_stock_movements(self, start_date: datetime, end_date: datetime, limit: int = 100) -> pd.DataFrame:
+        """
+        Busca movimentações de estoque (V1).
+        Payload exemplo:
+        {
+          "movimentacao": 0, "deposito": 0, "produto": "string", "valorMovimentacao": null,
+          "dataHoraMovimentacao": "...", "quantidade": 0, "tipoOperacao": null, "tipo": 0,
+          "origem": 0, "pedidoId": 0, "pedidoCodigo": 0, ...
+        }
+        """
+        if not self.session or not self.base_url:
+            raise RuntimeError("MagazordConnector não conectado. Chame connect() antes.")
+
+        # V1 endpoint
+        base_v1 = self.base_url.replace('/v2', '/v1')
+        url = f"{base_v1}/listMovimentacaoEstoque"
+        
+        # Formatar datas para ATOM/ISO com timezone se possível, ou string simples
+        # V1 costuma aceitar yyyy-MM-ddTHH:mm:ss
+        start_str = start_date.strftime('%Y-%m-%dT00:00:00')
+        end_str = end_date.strftime('%Y-%m-%dT23:59:59')
+        
+        offset = 0
+        all_movements = []
+        
+        logger.info(f"Buscando movimentações de {start_str} a {end_str}")
+        
+        while True:
+            self.rate_limiter.wait_if_needed('magazord_stock_movements')
+            params = {
+                'limit': limit,
+                'offset': offset,
+                'dataHoraMovimentacaoInicial': start_str,
+                'dataHoraMovimentacaoFinal': end_str
+            }
+            
+            try:
+                resp = self.session.get(url, params=params, timeout=60)
+                resp.raise_for_status()
+                payload = resp.json()
+                
+                items = payload.get('data', [])
+                if not items:
+                    break
+                    
+                for item in items:
+                    all_movements.append({
+                        'movement_id': str(item.get('movimentacao')),
+                        'product_id': str(item.get('produto')),
+                        'date': item.get('dataHoraMovimentacao'),
+                        'qty': item.get('quantidade'),
+                        'type': item.get('tipo'), # 0, 1?
+                        'operation_type': item.get('tipoOperacao'),
+                        'origin': item.get('origem'),
+                        'order_id': str(item.get('pedidoId') or item.get('pedidoCodigo') or ''),
+                        'invoice_id': str(item.get('notaFiscalId') or ''),
+                        'observation': item.get('observacao'),
+                        'deposito': item.get('deposito'),
+                        'created_at': item.get('dataHoraInclusao')
+                    })
+                
+                total = payload.get('total', 0)
+                if len(all_movements) >= total and total > 0:
+                    break
+                    
+                offset += limit
+                
+                # Safety break for infinite loops if API doesn't report total correctly
+                if len(items) < limit:
+                    break
+                    
+            except Exception as e:
+                logger.error(f"Erro ao buscar movimentações (offset={offset}): {e}")
+                break
+                
+        return pd.DataFrame(all_movements)
+
+
