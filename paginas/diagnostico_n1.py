@@ -10,21 +10,118 @@ from components.rombo_theme import inject_rombo_bleed_css
 from utils.KPIs import calculate_kpis, per_line_lost_revenue
 from utils.svg_icons import get_svg_icon
 
-_BENCHMARK_LOW = 5.0
-_BENCHMARK_HIGH = 8.0
 _ROMBO_DEFAULT_CALENDLY = "https://calendly.com/brunomendessj/15min"
 _ROMBO_LINKEDIN = "https://www.linkedin.com/in/brunomendesinsightexpert/"
 
 
-def _benchmark_extra_loss(lost_revenue: float, cancel_rate: float) -> float:
+def _parse_benchmark_float(raw: str, default: float) -> float:
+    if not raw or not str(raw).strip():
+        return default
+    try:
+        return float(str(raw).strip().replace(",", "."))
+    except (TypeError, ValueError):
+        return default
+
+
+def _resolve_benchmark_config() -> tuple[float, float, str]:
+    """
+    Piso, teto e rótulo do benchmark (varejo por padrão).
+
+    Configure no Streamlit Secrets ou no ambiente:
+    - INSIGHTX_BENCHMARK_LOW (ex.: 5)
+    - INSIGHTX_BENCHMARK_HIGH (ex.: 8)
+    - INSIGHTX_BENCHMARK_SEGMENT (ex.: varejo saudável | marketplace de moda | B2B industrial)
+    """
+    low, high = 5.0, 8.0
+    label = "varejo saudável"
+
+    low = _parse_benchmark_float(os.getenv("INSIGHTX_BENCHMARK_LOW", ""), low)
+    high = _parse_benchmark_float(os.getenv("INSIGHTX_BENCHMARK_HIGH", ""), high)
+    seg = os.getenv("INSIGHTX_BENCHMARK_SEGMENT", "").strip()
+    if seg:
+        label = seg
+
+    try:
+        sec = st.secrets
+        if "INSIGHTX_BENCHMARK_LOW" in sec:
+            low = _parse_benchmark_float(str(sec["INSIGHTX_BENCHMARK_LOW"]), low)
+        if "INSIGHTX_BENCHMARK_HIGH" in sec:
+            high = _parse_benchmark_float(str(sec["INSIGHTX_BENCHMARK_HIGH"]), high)
+        if "INSIGHTX_BENCHMARK_SEGMENT" in sec:
+            s = str(sec["INSIGHTX_BENCHMARK_SEGMENT"]).strip()
+            if s:
+                label = s
+    except Exception:
+        pass
+
+    if low > high:
+        low, high = high, low
+    if high <= 0.01:
+        high = 8.0
+    if low < 0:
+        low = 0.0
+    return low, high, label
+
+
+def _benchmark_extra_loss(lost_revenue: float, cancel_rate: float, ref_ceiling_pct: float) -> float:
     """
     Estimativa grosseira: quanto da receita perdida com cancelamentos excede o que seria esperado
-    se a taxa estivesse no teto de referência (8%), assumindo relação aproximadamente linear.
+    se a taxa estivesse no teto de referência (ref_ceiling_pct), assumindo relação aproximadamente linear.
     """
-    if cancel_rate <= 0.01 or lost_revenue <= 0:
+    if cancel_rate <= 0.01 or lost_revenue <= 0 or ref_ceiling_pct <= 0:
         return 0.0
-    lost_at_ref = lost_revenue * (_BENCHMARK_HIGH / cancel_rate)
+    lost_at_ref = lost_revenue * (ref_ceiling_pct / cancel_rate)
     return max(0.0, lost_revenue - lost_at_ref)
+
+
+def _render_benchmark_strip(
+    cancel_rate: float,
+    revenue_lost: float,
+    *,
+    bench_low: float,
+    bench_high: float,
+    segment_label: str,
+) -> None:
+    label_esc = html.escape(segment_label)
+    extra_vs = _benchmark_extra_loss(revenue_lost, cancel_rate, bench_high)
+    extra_txt = html.escape(f"R$ {extra_vs:,.2f}")
+
+    line1 = (
+        f"<strong>Sua taxa:</strong> {cancel_rate:.1f}% &nbsp;|&nbsp;"
+        f"<strong>Referência de mercado ({label_esc}):</strong> {bench_low:.0f}% a {bench_high:.0f}%<br/>"
+    )
+
+    if cancel_rate > bench_high:
+        body = (
+            f"<strong>Impacto estimado:</strong> acima do teto de referência ({bench_high:.0f}%), a perda por "
+            "cancelamento tende a pesar mais — em leitura linear (não é auditoria), o <em>excesso</em> vs. operar "
+            f"perto de {bench_high:.0f}% de taxa soma cerca de <strong>{extra_txt}</strong> a mais em receita perdida."
+        )
+    elif cancel_rate >= bench_low:
+        body = (
+            f"<strong>Leitura:</strong> sua taxa está <strong>dentro</strong> da faixa de referência "
+            f"({bench_low:.0f}%–{bench_high:.0f}%). A receita perdida com cancelamentos continua material (card acima). "
+            f"No modelo linear usado aqui, o indicador vs. teto de {bench_high:.0f}% fica em cerca de "
+            f"<strong>{extra_txt}</strong> (leitura rápida, não é auditoria)."
+        )
+    else:
+        body = (
+            f"<strong>Leitura:</strong> sua taxa está <strong>abaixo</strong> do piso de referência ({bench_low:.0f}%). "
+            f"Frente ao segmento <em>{label_esc}</em>, isso costuma ser positivo. O valor em reais perdido reflete a sua base; "
+            f"o ajuste vs. teto ({bench_high:.0f}%) neste modelo linear aparece como cerca de <strong>{extra_txt}</strong>."
+        )
+
+    st.markdown(
+        textwrap.dedent(
+            f"""
+            <div class="rombo-benchmark-strip">
+              {line1}
+              {body}
+            </div>
+            """
+        ).strip(),
+        unsafe_allow_html=True,
+    )
 
 
 def _render_blood_kpis(kpis_dict: dict[str, str]) -> None:
@@ -91,21 +188,13 @@ def show(df: pd.DataFrame, *, data_path: str = "") -> None:
     }
     _render_blood_kpis(kpis_dict)
 
-    extra_vs = _benchmark_extra_loss(revenue_lost, cancel_rate)
-    extra_txt = html.escape(f"R$ {extra_vs:,.2f}")
-    st.markdown(
-        textwrap.dedent(
-            f"""
-            <div class="rombo-benchmark-strip">
-              <strong>Sua taxa:</strong> {cancel_rate:.1f}% &nbsp;|&nbsp;
-              <strong>Referência de mercado (varejo saudável):</strong> {_BENCHMARK_LOW:.0f}% a {_BENCHMARK_HIGH:.0f}%<br/>
-              <strong>Impacto estimado:</strong> na faixa de referência, a perda por cancelamento costuma ser menor —
-              aqui o <em>excesso</em> em relação a operar perto de {_BENCHMARK_HIGH:.0f}% de taxa soma cerca de <strong>{extra_txt}</strong>
-              a mais em receita perdida (estimativa linear para leitura rápida, não é auditoria).
-            </div>
-            """
-        ).strip(),
-        unsafe_allow_html=True,
+    bench_low, bench_high, bench_label = _resolve_benchmark_config()
+    _render_benchmark_strip(
+        cancel_rate,
+        revenue_lost,
+        bench_low=bench_low,
+        bench_high=bench_high,
+        segment_label=bench_label,
     )
 
     st.markdown("<br>", unsafe_allow_html=True)
