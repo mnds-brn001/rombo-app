@@ -39,7 +39,8 @@ logger = logging.getLogger(__name__)
 COSMETICOS_ALIAS_MAP: Dict[str, set] = {
     # Identificadores
     "order_id": {
-        "pedido_id", "pedido id", "id_pedido", "numero_pedido"
+        "pedido_id", "pedido id", "id_pedido", "numero_pedido",
+        "pedido", "order", "order_id", "idpedido"
     },
     "customer_id": {
         "id_cliente", "id cliente", "cliente_id", "codigo_cliente"
@@ -53,13 +54,14 @@ COSMETICOS_ALIAS_MAP: Dict[str, set] = {
     "product_id": {
         "produto/derivação_código_der", "produto/derivacao_codigo_der",
         "produto_derivacao_codigo_der",  # Versão normalizada
-        "produto_id", "codigo_produto", "sku",
+        "produto_id", "codigo_produto", "sku", "codigo",
         "produto/derivação_id_der", "produto_derivacao_id_der"
     },
     
     # Datas
     "order_purchase_timestamp": {
-        "data/hora", "data_hora", "data_pedido", "created_at"
+        "data/hora", "data_hora", "data_pedido", "created_at",
+        "data_hora_pedido", "datahora", "order_date", "data_hora_criacao"
     },
     "marketplace_date": {
         "data_marketplace", "data marketplace", "marketplace_date"
@@ -70,7 +72,8 @@ COSMETICOS_ALIAS_MAP: Dict[str, set] = {
     
     # Valores monetários
     "price": {
-        "valor_total_pedido", "valor total pedido", "valor_pedido", "total_pedido"
+        "valor_total_pedido", "valor total pedido", "valor_pedido", "total_pedido",
+        "valor_produtos", "valor_liquido", "valor", "total_liquido"
     },
     "freight_value": {
         "valor_frete", "valor frete", "frete", "custo_frete"
@@ -110,7 +113,8 @@ COSMETICOS_ALIAS_MAP: Dict[str, set] = {
     
     # Status e categorias
     "order_status": {
-        "situação", "situacao", "status", "status_pedido"
+        "situação", "situacao", "status", "status_pedido",
+        "situaзгo", "situaггo", "status_do_pedido"
     },
     "marketplace": {
         "marketplace", "canal", "origem"
@@ -490,6 +494,12 @@ def normalize_column_names(df: pd.DataFrame) -> pd.DataFrame:
             .replace('ç', 'c')
             .replace('ñ', 'n')
             .replace('õ', 'o')
+            # Correções comuns de mojibake em headers (ex.: Situaзгo -> situacao; Cуdigo -> codigo)
+            .replace('з', 'c')
+            .replace('г', 'a')
+            .replace('у', 'o')
+            .replace('й', 'i')
+            .replace('ќ', '')
             .replace('�', '')  # Remover caracteres de encoding
             .strip('_')
         )
@@ -907,11 +917,26 @@ def calculate_derived_fields(df: pd.DataFrame) -> pd.DataFrame:
     
     # Flag de pedido cancelado baseada no mapeamento completo de status
     if 'order_status' in df_derived.columns:
+        status_code_map = {
+            "1": "aguardando pagamento",
+            "2": "cancelado pagamento",
+            "4": "aprovado",
+            "5": "faturamento iniciado",
+            "6": "nota fiscal emitida",
+            "7": "transporte",
+            "8": "entregue",
+            "14": "cancelado pagamento analise",
+            "16": "problema fluxo postal",
+            "17": "devolvido financeiro",
+            "26": "cancelado",
+        }
         def _normalize_status(s: Any) -> str:
             if pd.isna(s):
                 return ''
             import re as _re
             ss = str(s).lower().strip()
+            if _re.fullmatch(r"\d+", ss):
+                ss = status_code_map.get(ss, ss)
             ss = _re.sub(r'^\d+\s*-\s*', '', ss)
             ss = (ss.replace('ã','a').replace('á','a').replace('â','a')
                     .replace('ç','c').replace('é','e').replace('ê','e')
@@ -1014,6 +1039,21 @@ def map_order_status_to_funnel_stages(df: pd.DataFrame) -> pd.DataFrame:
         if pd.isna(status_value):
             return ''
         s = str(status_value).lower().strip()
+        status_code_map = {
+            "1": "aguardando pagamento",
+            "2": "cancelado pagamento",
+            "4": "aprovado",
+            "5": "faturamento iniciado",
+            "6": "nota fiscal emitida",
+            "7": "transporte",
+            "8": "entregue",
+            "14": "cancelado pagamento analise",
+            "16": "problema fluxo postal",
+            "17": "devolvido financeiro",
+            "26": "cancelado",
+        }
+        if re.fullmatch(r"\d+", s):
+            s = status_code_map.get(s, s)
         # remover prefixo "NN - "
         s = re.sub(r'^\d+\s*-\s*', '', s)
         # normalizar acentos essenciais

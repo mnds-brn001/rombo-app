@@ -171,8 +171,10 @@ def show(df: pd.DataFrame, *, data_path: str = "") -> None:
 
     revenue_lost = float(kpis_full.get("lost_revenue", 0.0))
     cancel_rate = float(kpis_full.get("cancellation_rate", 0.0))
-    total_revenue = float(kpis_eligible.get("total_revenue", 0.0))
-    total_orders = int(kpis_eligible.get("total_orders", 0))
+    # Para o relatório de rombo, exibir volume/base completos evita divergência de leitura
+    # com os logs do ETL (que consideram o dataset inteiro, não só elegíveis).
+    total_revenue = float(kpis_full.get("total_revenue", 0.0))
+    total_orders = int(kpis_full.get("total_orders", 0))
 
     st.markdown(
         f'<p class="rombo-section-drip">{get_svg_icon("warning", size=26)} O rombo em números '
@@ -183,8 +185,8 @@ def show(df: pd.DataFrame, *, data_path: str = "") -> None:
     kpis_dict = {
         "Dinheiro perdido com cancelamentos": f"R$ {revenue_lost:,.2f}",
         "Taxa de cancelamento": f"{cancel_rate:.1f}%",
-        "Receita total na base": f"R$ {total_revenue:,.2f}",
-        "Volume de pedidos": f"{total_orders:,}",
+        "Receita total na base (período)": f"R$ {total_revenue:,.2f}",
+        "Volume de pedidos (período)": f"{total_orders:,}",
     }
     _render_blood_kpis(kpis_dict)
 
@@ -253,7 +255,13 @@ def show(df: pd.DataFrame, *, data_path: str = "") -> None:
         else:
             st.info("Não há dados suficientes de cancelamento por SKU.")
     else:
-        st.info("Não foram encontrados pedidos cancelados neste dataset.")
+        if "product_id" not in df.columns:
+            st.info(
+                "Este export veio sem detalhamento de SKU no pedido. "
+                "Conseguimos calcular rombo e taxa de cancelamento, mas o Top SKUs exige coluna de produto."
+            )
+        else:
+            st.info("Não foram encontrados pedidos cancelados neste dataset.")
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown(

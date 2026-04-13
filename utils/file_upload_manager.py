@@ -8,10 +8,14 @@ import os
 import re
 import tempfile
 import shutil
+import hashlib
+import logging
 from pathlib import Path
 from typing import Optional, Tuple, Dict, Any
 from datetime import datetime
 import sys
+
+logger = logging.getLogger(__name__)
 
 class FileUploadManager:
     """Gerenciador de upload e processamento de arquivos"""
@@ -20,18 +24,69 @@ class FileUploadManager:
         self.upload_dir = Path("dados_cliente/uploads")
         self.processed_dir = Path("dados_cliente/processed")
         self.temp_dir = Path("dados_cliente/temp")
+        self.max_upload_mb = 220
         
         # Criar diretórios se não existirem
         for dir_path in [self.upload_dir, self.processed_dir, self.temp_dir]:
             dir_path.mkdir(parents=True, exist_ok=True)
+
+    def _filename_seems_orders_export(self, filename: str) -> bool:
+        """
+        Aceita variações comuns do export de pedidos para reduzir falso negativo.
+        """
+        fname = Path(filename).name.lower()
+        patterns = [
+            r"exportar\s+consulta\s+de\s+pedidos.*\.csv$",
+            r"consulta\s+de\s+pedidos.*\.csv$",
+            r"pedidos.*\.csv$",
+            r"orders?.*\.csv$",
+        ]
+        return any(re.search(p, fname, flags=re.IGNORECASE) for p in patterns)
+
+    def _detect_csv_reading_params(
+        self,
+        file_path: Path,
+        nrows: int = 60,
+    ) -> Tuple[Optional[pd.DataFrame], Optional[str], Optional[str], Optional[str]]:
+        """
+        Detecta combinação robusta de delimiter + encoding.
+        Retorna: (df_preview, encoding, delimiter, reason)
+        """
+        encodings = ["utf-8-sig", "latin1", "cp1252", "iso-8859-1", "utf-8"]
+        delimiters = [";", ",", "\t", "|"]
+        best_df: Optional[pd.DataFrame] = None
+        best_encoding: Optional[str] = None
+        best_delim: Optional[str] = None
+        best_score = -1
+
+        for encoding in encodings:
+            for delim in delimiters:
+                try:
+                    df = pd.read_csv(file_path, sep=delim, encoding=encoding, nrows=nrows)
+                except (UnicodeDecodeError, pd.errors.ParserError, ValueError):
+                    continue
+                if df is None or df.empty:
+                    continue
+                # score simples: mais colunas úteis e menos unnamed
+                ncols = len(df.columns)
+                unnamed = sum(1 for c in df.columns if str(c).lower().startswith("unnamed"))
+                score = (ncols * 10) - (unnamed * 3)
+                if score > best_score:
+                    best_score = score
+                    best_df = df
+                    best_encoding = encoding
+                    best_delim = delim
+
+        if best_df is None:
+            return None, None, None, "ERR_CSV_UNREADABLE"
+        return best_df, best_encoding, best_delim, None
     
     def validate_filename(self, filename: str) -> bool:
         """
         Valida se o nome do arquivo segue o padrão esperado
         Padrão: "Exportar Consulta de Pedidos*.csv"
         """
-        pattern = r"^Exportar Consulta de Pedidos.*\.csv$"
-        return bool(re.match(pattern, filename, re.IGNORECASE))
+        return self._filename_seems_orders_export(filename)
     
     def extract_date_from_filename(self, filename: str) -> Optional[str]:
         """
@@ -48,20 +103,41 @@ class FileUploadManager:
         Returns: (success, message, file_path)
         """
         try:
+            safe_name = Path(uploaded_file.name).name
+
             # Validar nome do arquivo
-            if not self.validate_filename(uploaded_file.name):
-                return False, f"❌ Nome do arquivo inválido. Use o padrão: 'Exportar Consulta de Pedidos*.csv'", None
+            if not self.validate_filename(safe_name):
+                return False, (
+                    "❌ Nome do arquivo não reconhecido como export de pedidos. "
+                    "Use um CSV de pedidos (ex.: 'Exportar Consulta de Pedidos*.csv')."
+                ), None
+
+            # Validar tamanho para evitar upload acidental massivo
+            size_bytes = int(getattr(uploaded_file, "size", 0) or 0)
+            if size_bytes > self.max_upload_mb * 1024 * 1024:
+                return False, (
+                    f"❌ Arquivo muito grande ({size_bytes/1024/1024:.1f} MB). "
+                    f"Limite recomendado: {self.max_upload_mb} MB."
+                ), None
+
+            file_bytes = uploaded_file.getbuffer()
+            digest = hashlib.sha256(file_bytes).hexdigest()[:12]
+
+            # Deduplicação simples por hash: evita reprocessar o mesmo arquivo sem necessidade.
+            existing = sorted(self.upload_dir.glob(f"*_{digest}_*.csv"))
+            if existing:
+                return True, f"✅ Arquivo já recebido anteriormente: {safe_name}", existing[-1]
             
             # Gerar nome único para evitar conflitos
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            safe_filename = f"{timestamp}_{uploaded_file.name}"
+            safe_filename = f"{timestamp}_{digest}_{safe_name}"
             file_path = self.upload_dir / safe_filename
             
             # Salvar arquivo
             with open(file_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
+                f.write(file_bytes)
             
-            return True, f"✅ Arquivo salvo: {uploaded_file.name}", file_path
+            return True, f"✅ Arquivo salvo: {safe_name}", file_path
             
         except Exception as e:
             return False, f"❌ Erro ao salvar arquivo: {str(e)}", None
@@ -71,21 +147,9 @@ class FileUploadManager:
         Valida estrutura do CSV usando o pipeline do adaptador de cosméticos
         """
         try:
-            # Tentar diferentes encodings (mesmo padrão do adaptador)
-            encodings = ['utf-8-sig', 'latin1', 'cp1252', 'iso-8859-1', 'utf-8']
-            df = None
-            used_encoding = None
-            
-            for encoding in encodings:
-                try:
-                    df = pd.read_csv(file_path, sep=';', encoding=encoding, nrows=10)  # Preview apenas
-                    used_encoding = encoding
-                    break
-                except (UnicodeDecodeError, pd.errors.ParserError):
-                    continue
-            
+            df, used_encoding, used_delimiter, read_err = self._detect_csv_reading_params(file_path, nrows=50)
             if df is None:
-                return False, "❌ Não foi possível ler o arquivo com nenhum encoding", None
+                return False, "❌ Não foi possível ler o CSV (encoding/delimitador inválido).", None
             
             # Usar a mesma validação do adaptador de cosméticos
             from dados_cliente.adaptador_cosmeticos import normalize_column_names, apply_cosmeticos_aliases
@@ -100,9 +164,24 @@ class FileUploadManager:
             
             if len(mapped_columns) < 2:  # Pelo menos 2 das 3 colunas essenciais
                 available_cols = list(df.columns)[:10]  # Mostrar primeiras 10 colunas
-                return False, f"❌ Estrutura não reconhecida. Colunas encontradas: {', '.join(available_cols)}...", df
-            
-            return True, f"✅ Arquivo compatível - {len(df.columns)} colunas, encoding: {used_encoding}", df
+                return False, (
+                    "❌ Estrutura não reconhecida. "
+                    f"(detecção: delim='{used_delimiter}' encoding='{used_encoding}') "
+                    f"Colunas encontradas: {', '.join(available_cols)}..."
+                ), df
+
+            warnings = []
+            if 'order_status' not in df_mapped.columns and 'pedido_cancelado' not in df_mapped.columns:
+                warnings.append("sem status/cancelamento (taxa de cancelamento pode divergir)")
+            if 'product_id' not in df_mapped.columns:
+                warnings.append("sem SKU detalhado (ranking Top SKUs pode não aparecer)")
+
+            warn_txt = f" | Avisos: {', '.join(warnings)}" if warnings else ""
+            return True, (
+                "✅ Arquivo compatível "
+                f"(delim='{used_delimiter}' | encoding='{used_encoding}' | colunas={len(df.columns)})"
+                f"{warn_txt}"
+            ), df
             
         except Exception as e:
             return False, f"❌ Erro ao validar arquivo: {str(e)}", None
@@ -120,16 +199,25 @@ class FileUploadManager:
             
             # Usar processador ETL simplificado
             from utils.simple_etl_processor import process_uploaded_file
+
+            # Pré-detecção para passar ao ETL (evita divergência por delimitador/encoding).
+            _df_preview, used_encoding, used_delimiter, _ = self._detect_csv_reading_params(file_path, nrows=80)
             
-            success, message, processed_file_path = process_uploaded_file(
-                str(file_path), 
-                str(output_dir)
-            )
+            # Retry simples para falhas transitórias.
+            last_message = "Falha desconhecida no ETL."
+            for attempt in range(1, 3):
+                success, message, processed_file_path = process_uploaded_file(
+                    str(file_path),
+                    str(output_dir),
+                    encoding=used_encoding,
+                    delimiter=used_delimiter,
+                )
+                if success and processed_file_path:
+                    return True, f"✅ {message}", Path(processed_file_path)
+                last_message = message
+                logger.warning("ETL attempt %s failed: %s", attempt, message)
             
-            if success and processed_file_path:
-                return True, f"✅ {message}", Path(processed_file_path)
-            else:
-                return False, f"❌ {message}", None
+            return False, f"❌ {last_message}", None
                 
         except Exception as e:
             return False, f"❌ Erro no processamento ETL: {str(e)}", None

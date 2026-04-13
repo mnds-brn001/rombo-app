@@ -115,6 +115,7 @@ REQUIRED_COLUMNS: list[str] = [
     "marketplace",
     # Monetário
     "price",
+    "price_original",
     "freight_value",
     "valorTotal",
     # "product_cost", # Removido (default)
@@ -160,6 +161,7 @@ REQUIRED_DEFAULTS: dict[str, Any] = {
     "order_delivered_customer_date": pd.NaT,
     # Numéricos
     "price": 0.0,
+    "price_original": 0.0,
     "freight_value": 0.0,
     "valorTotal": 0.0,
     "product_cost": 0.0,
@@ -421,8 +423,20 @@ Caminhos verificados:
 
     read_kwargs = {}
     if use_required_subset:
-        read_kwargs["columns"] = REQUIRED_COLUMNS
-        print(f"   [INFO] Carregando apenas {len(REQUIRED_COLUMNS)} colunas essenciais")
+        cols_to_read = REQUIRED_COLUMNS
+        # Evita erro de FieldRef.Name quando o parquet não possui todas as colunas essenciais.
+        try:
+            import pyarrow.parquet as pq  # type: ignore
+            schema = pq.ParquetFile(parquet_path).schema_arrow
+            available = set(schema.names)
+            cols_to_read = [c for c in REQUIRED_COLUMNS if c in available]
+            missing = [c for c in REQUIRED_COLUMNS if c not in available]
+            if missing:
+                print(f"   [INFO] Colunas ausentes no parquet (defaults serão aplicados): {missing[:6]}{'...' if len(missing) > 6 else ''}")
+        except Exception:
+            cols_to_read = REQUIRED_COLUMNS
+        read_kwargs["columns"] = cols_to_read
+        print(f"   [INFO] Carregando apenas {len(cols_to_read)} colunas essenciais")
 
     # Configurar filtros de partição se solicitado
     filters = None
@@ -688,11 +702,20 @@ def lost_revenue_cancelled(df: pd.DataFrame) -> float:
     df_c = df[df["pedido_cancelado"] == 1]
     if df_c.empty:
         return 0.0
-    total = float(_resolve_revenue_total(df_c))
+    # Valor pela cadeia padrão (valorTotal -> fallbacks)
+    total_resolved = float(_resolve_revenue_total(df_c))
+
+    # Em exports de pedidos (1 linha por pedido), o pipeline zera `price` para cancelados
+    # e mantém `price_original` com o valor bruto da linha. Esse número é o mais próximo
+    # do "impacto de cancelamentos" reportado no ETL.
+    total_price_original = 0.0
+    if "price_original" in df_c.columns:
+        total_price_original = float(pd.to_numeric(df_c["price_original"], errors="coerce").fillna(0).sum())
+
+    # Escolher o maior evita subestimação quando `valorTotal` vem parcial/zerado.
+    total = max(total_resolved, total_price_original)
     if total > 0:
         return total
-    if "price_original" in df_c.columns:
-        return float(pd.to_numeric(df_c["price_original"], errors="coerce").fillna(0).sum())
     return 0.0
 
 

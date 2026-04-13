@@ -14,7 +14,6 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from components.glass_card import render_page_title
 from components.rombo_theme import inject_rombo_landing_css
 from paginas.diagnostico_n1 import show as show_rombo_relatorio
-from utils.backup_notifier import persist_backup_and_notify
 from utils.file_upload_manager import FileUploadManager
 from utils.KPIs import load_data
 from utils.theme_manager import get_theme_manager
@@ -128,14 +127,6 @@ def render_upload_screen():
 
                             if proc_success and processed_dir:
                                 st.success("Arquivo recebido. Abrindo a leitura do rombo na sua operação.")
-                                notify_ok, notify_msg, _ = persist_backup_and_notify(
-                                    Path(processed_dir),
-                                    recipient="brunomendessj@gmail.com",
-                                )
-                                if notify_ok:
-                                    st.info("Backup salvo e enviado por e-mail.")
-                                else:
-                                    st.warning(f"Backup/notificação: {notify_msg}")
                                 st.session_state.rombo_data_path = str(processed_dir)
                                 st.rerun()
                             else:

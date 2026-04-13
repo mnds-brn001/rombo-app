@@ -19,7 +19,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def process_uploaded_file(input_file: str, output_dir: str) -> tuple[bool, str, str]:
+def process_uploaded_file(
+    input_file: str,
+    output_dir: str,
+    *,
+    encoding: str | None = None,
+    delimiter: str | None = None,
+) -> tuple[bool, str, str]:
     """
     Processa arquivo carregado usando o adaptador de cosméticos
     
@@ -50,18 +56,24 @@ def process_uploaded_file(input_file: str, output_dir: str) -> tuple[bool, str, 
         logger.info(f"Iniciando processamento: {input_file}")
         
         # 1. Carregar dados
-        encodings = ['utf-8-sig', 'latin1', 'cp1252', 'iso-8859-1', 'utf-8']
+        encodings = [encoding] if encoding else ['utf-8-sig', 'latin1', 'cp1252', 'iso-8859-1', 'utf-8']
+        delimiters = [delimiter] if delimiter else [';', ',', '\t', '|']
         df = None
         used_encoding = None
+        used_delimiter = None
         
         for encoding in encodings:
-            try:
-                df = pd.read_csv(input_file, sep=';', encoding=encoding)
-                used_encoding = encoding
-                logger.info(f"Arquivo carregado com encoding: {encoding}")
+            for delim in delimiters:
+                try:
+                    df = pd.read_csv(input_file, sep=delim, encoding=encoding, low_memory=False)
+                    used_encoding = encoding
+                    used_delimiter = delim
+                    logger.info("Arquivo carregado com encoding=%s e delimiter='%s'", encoding, delim)
+                    break
+                except (UnicodeDecodeError, pd.errors.ParserError, ValueError):
+                    continue
+            if df is not None:
                 break
-            except (UnicodeDecodeError, pd.errors.ParserError):
-                continue
         
         if df is None:
             return False, "Erro: Não foi possível ler o arquivo", ""
@@ -129,6 +141,7 @@ def process_uploaded_file(input_file: str, output_dir: str) -> tuple[bool, str, 
         }
         
         success_msg = f"Processamento concluído com sucesso!\n"
+        success_msg += f"• Leitura: encoding={used_encoding} | delim='{used_delimiter}'\n"
         success_msg += f"• Registros: {summary['registros_finais']:,}\n"
         success_msg += f"• Receita: R$ {summary['receita_total']:,.2f}\n"
         success_msg += f"• Clientes: {summary['clientes_unicos']:,}\n"
