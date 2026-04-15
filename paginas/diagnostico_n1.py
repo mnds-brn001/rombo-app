@@ -156,11 +156,38 @@ def _resolve_concentration_dimension(df_cancelled: pd.DataFrame) -> tuple[str | 
     sku_candidates = ["product_id", "sku", "codigo", "produto_id", "product_sku"]
     category_candidates = ["product_category_name", "category_name", "categoriaArvore", "categoria"]
 
+    order_col = "order_id" if "order_id" in df_cancelled.columns else None
+
+    def _looks_like_order_id(col: str) -> bool:
+        """
+        Heurística para evitar tratar ID de pedido como SKU:
+        - cardinalidade quase 1:1 com linhas canceladas
+        - cancelamentos por chave muito próximos de 1
+        """
+        if col not in df_cancelled.columns or len(df_cancelled) == 0:
+            return False
+        s = df_cancelled[col].astype("string").str.strip()
+        s = s.mask(s.isna() | (s == "") | (s.str.lower() == "nan"))
+        s_valid = s.dropna()
+        if s_valid.empty:
+            return False
+
+        unique_ratio = float(s_valid.nunique() / len(s_valid))
+        if order_col and order_col in df_cancelled.columns:
+            grp = df_cancelled.assign(_dim=s).dropna(subset=["_dim"]).groupby("_dim")[order_col].nunique()
+            median_canc = float(grp.median()) if not grp.empty else 0.0
+        else:
+            grp = df_cancelled.assign(_dim=s).dropna(subset=["_dim"]).groupby("_dim").size()
+            median_canc = float(grp.median()) if not grp.empty else 0.0
+
+        # comportamento típico de ID de pedido indevidamente usado como SKU
+        return unique_ratio >= 0.92 and median_canc <= 1.2
+
     for col in sku_candidates:
         if col in df_cancelled.columns:
             series = df_cancelled[col].astype("string").str.strip()
             usable = series.notna() & (series != "") & (series.str.lower() != "nan")
-            if bool(usable.any()):
+            if bool(usable.any()) and not _looks_like_order_id(col):
                 return col, "SKU"
 
     for col in category_candidates:
