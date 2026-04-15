@@ -6,13 +6,14 @@ import os
 import sys
 import textwrap
 from pathlib import Path
+from urllib.parse import quote
 
 import streamlit as st
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from components.glass_card import render_page_title
-from components.rombo_theme import inject_rombo_landing_css
+from components.rombo_theme import inject_rombo_demo_button_css, inject_rombo_landing_css
 from paginas.diagnostico_n1 import show as show_rombo_relatorio
 from utils.file_upload_manager import FileUploadManager
 from utils.KPIs import load_data
@@ -22,10 +23,79 @@ st.set_page_config(
     page_title="Insight Expert — Rombo financeiro",
     page_icon="🩸",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded",
 )
 
 get_theme_manager().apply_theme()
+
+_ROMBO_DEFAULT_LINKEDIN = "https://www.linkedin.com/in/brunomendesinsightexpert/"
+_ROMBO_DEFAULT_WA_PREFILL = (
+    "Olá! Vi o Rombo financeiro no Insight Expert e quero conversar sobre cancelamentos e receita na minha operação."
+)
+
+
+def _secret_str(key: str) -> str:
+    """Lê chave na raiz do secrets ou dentro de [auth] (TOML costuma aninhar chaves após [auth])."""
+    try:
+        sec = st.secrets
+        if key in sec:
+            return str(sec[key]).strip()
+        auth = sec.get("auth") if hasattr(sec, "get") else None
+        if auth is None and "auth" in sec:
+            auth = sec["auth"]
+        if isinstance(auth, dict) and key in auth:
+            return str(auth[key]).strip()
+    except Exception:
+        pass
+    return ""
+
+
+def _resolve_contact_urls() -> tuple[str, str]:
+    """LinkedIn (sempre) e WhatsApp (wa.me + texto pré-preenchido) se telefone estiver em env/secrets."""
+    li = os.getenv("INSIGHTX_LINKEDIN_URL", _ROMBO_DEFAULT_LINKEDIN).strip()
+    phone = os.getenv("INSIGHTX_WHATSAPP_PHONE", "").strip()
+    wa_msg = os.getenv("INSIGHTX_WHATSAPP_PREFILL", _ROMBO_DEFAULT_WA_PREFILL).strip()
+    li = _secret_str("INSIGHTX_LINKEDIN_URL") or li
+    phone = _secret_str("INSIGHTX_WHATSAPP_PHONE") or phone
+    wa_msg = _secret_str("INSIGHTX_WHATSAPP_PREFILL") or wa_msg
+    phone = "".join(ch for ch in phone if ch.isdigit())
+    # Brasil: DDD + celular (10 ou 11 dígitos) sem DDI → prefixa 55 para wa.me
+    if phone and not phone.startswith("55") and len(phone) in (10, 11):
+        phone = "55" + phone
+    if len(phone) >= 12:
+        base = f"https://wa.me/{phone}"
+        if wa_msg:
+            base += f"?text={quote(wa_msg, safe='')}"
+        wa = base
+    else:
+        wa = ""
+    return li, wa
+
+
+def render_rombo_sidebar() -> None:
+    """Logo Insight Expert + links de contato (sidebar fixa em todo o app Rombo)."""
+    inject_rombo_landing_css()
+    logo_path = Path("components/img/logo.png")
+    with st.sidebar:
+        if logo_path.exists():
+            st.image(str(logo_path), use_container_width=False, width=140)
+        st.caption("Contato")
+        li, wa = _resolve_contact_urls()
+        links = '<div class="rombo-sidebar-links">'
+        links += (
+            f'<a class="rombo-contact-pill rombo-contact-li" href="{li}" '
+            'target="_blank" rel="noopener noreferrer">LinkedIn</a>'
+        )
+        if wa:
+            links += (
+                f'<a class="rombo-contact-pill rombo-contact-wa" href="{wa}" '
+                'target="_blank" rel="noopener noreferrer">WhatsApp</a>'
+            )
+        links += "</div>"
+        st.markdown(links, unsafe_allow_html=True)
+        if not wa:
+            st.caption("WhatsApp: defina `INSIGHTX_WHATSAPP_PHONE` nos secrets (DDI+DDD+número, só dígitos).")
+        st.markdown("---")
 
 
 def _resolve_demo_data_path() -> str:
@@ -69,16 +139,9 @@ def _bucket_header_html(
 
 
 def render_upload_screen():
-    inject_rombo_landing_css()
-
+    inject_rombo_demo_button_css()
     _, center, _ = st.columns([1, 5, 1])
     with center:
-        logo_path = Path("components/img/logo.png")
-        if logo_path.exists():
-            lc1, lc2, lc3 = st.columns([1, 2, 1])
-            with lc2:
-                st.image(str(logo_path), use_container_width=True)
-
         render_page_title(
             "Rombo financeiro",
             icon="💎",
@@ -88,9 +151,7 @@ def render_upload_screen():
         )
 
         st.markdown(
-            "<p class='rombo-funnel-note'>Abaixo, três blocos para você enxergar o caminho: "
-            "<strong>hoje</strong> basta o arquivo de pedidos. Os outros dois mostram o que passamos a integrar "
-            "quando você contrata o diagnóstico completo ou a assinatura do Insight Expert.</p>",
+            "<p class='rombo-funnel-note'>Abaixo, três blocos para você enxergar o caminho: hoje basta o arquivo de pedidos. Os outros dois mostram o que passamos a integrar quando você contrata o diagnóstico completo ou a assinatura do Insight Expert.</p>",
             unsafe_allow_html=True,
         )
 
@@ -139,13 +200,20 @@ def render_upload_screen():
         with b2:
             st.markdown(
                 _bucket_header_html(
-                    "Estoque e movimentação",
-                    "Quando você quiser ver <strong>dinheiro parado</strong>, compra errada e giro de estoque "
-                    "junto com os cancelamentos, usamos exportações de saldo ou movimentos do seu WMS/ERP.",
-                    "Passo 2 · com o Insight Expert",
+                    "Nível 1 — Diagnóstico Estratégico + Playbook",
+                    "Projeto único (sem mensalidade), conforme porte. "
+                    "Para quem precisa de <strong>clareza com dados</strong> — não opinião — sobre onde a operação sangra "
+                    "antes de compromisso maior.",
+                    "Passo 2 · Nível 1",
                     locked=True,
-                    body='<div class="rombo-bucket-locked-body">Esse tipo de dado entra no <strong>Diagnóstico Estratégico</strong> '
-                    "ou na <strong>assinatura</strong> — a equipe conecta na sua operação; nesta tela o foco é só pedidos.</div>",
+                    body=(
+                        '<div class="rombo-bucket-locked-body">'
+                        "<strong>O que você leva:</strong> conexão dos seus dados ao Insight Expert; diagnóstico com "
+                        "matriz BCG híbrida e mapa de capital preso; lista priorizada de SKUs e categorias por impacto; "
+                        "playbook com <strong>20 a 50 ações</strong> específicas; <strong>1 a 2 calls</strong> de leitura. "
+                        "<strong>Resultado:</strong> saber onde agir primeiro e quanto isso representa em receita recuperável."
+                        "</div>"
+                    ),
                 ),
                 unsafe_allow_html=True,
             )
@@ -153,13 +221,19 @@ def render_upload_screen():
         with b3:
             st.markdown(
                 _bucket_header_html(
-                    "Catálogo e precificação",
-                    "Para responder <strong>“estou sangrando em receita ou em margem?”</strong> cruzamos SKU, custo, "
-                    "preço de venda e mix — assim você prioriza o que realmente paga a conta.",
-                    "Passo 3 · com o Insight Expert",
+                    "Nível 2 — Recorrência em escala (Enterprise)",
+                    "Para operações <strong>complexas</strong> — multi-canal, integrações sob medida, múltiplos times. "
+                    "<strong>Sob proposta.</strong> Fee variável pode compor o modelo (transparência em contrato).",
+                    "Passo 3 · Nível 2",
                     locked=True,
-                    body='<div class="rombo-bucket-locked-body">Também faz parte do diagnóstico completo ou da assinatura: '
-                    "aí ligamos cancelamentos à rentabilidade real de cada produto, não só ao ticket.</div>",
+                    body=(
+                        '<div class="rombo-bucket-locked-body">'
+                        "<strong>Em sua operação:</strong> setup enterprise, APIs, módulos e treinamento alinhados ao seu modelo — "
+                        "com SLA definido. "
+                        "<strong>Recorrência operacional do dia a dia</strong> (painel, alertas, calibração mensal) é o "
+                        "<strong>Nível 2 — Assinatura</strong>. "
+                        "</div>"
+                    ),
                 ),
                 unsafe_allow_html=True,
             )
@@ -198,6 +272,7 @@ def render_diagnostic_screen(data_path: str):
 
 
 def main():
+    render_rombo_sidebar()
     if "rombo_data_path" not in st.session_state:
         st.session_state.rombo_data_path = None
     # Sessões antigas do script app_n1.py

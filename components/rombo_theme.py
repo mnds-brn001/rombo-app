@@ -93,6 +93,72 @@ ROMBO_LANDING_CSS = """
   margin: 8px 0 20px 0;
   padding: 0 8px;
 }
+/* Sidebar Rombo: contato (pills, sem azul padrão) */
+.rombo-sidebar-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+  padding-bottom: 4px;
+}
+.rombo-sidebar-links a.rombo-contact-pill {
+  display: block;
+  text-align: center;
+  text-decoration: none !important;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: #e2e8f0 !important;
+  background: linear-gradient(165deg,
+    rgba(51, 65, 85, 0.55) 0%,
+    rgba(30, 41, 59, 0.85) 100%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+}
+.rombo-sidebar-links a.rombo-contact-li:hover {
+  border-color: rgba(96, 165, 250, 0.55);
+  color: #f8fafc !important;
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.2);
+}
+.rombo-sidebar-links a.rombo-contact-wa:hover {
+  border-color: rgba(52, 211, 153, 0.5);
+  color: #ecfdf5 !important;
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.18);
+}
+</style>
+"""
+
+# Estilo do botão "dados de demonstração" na landing (único primary típico nesta tela)
+ROMBO_DEMO_BUTTON_CSS = """
+<style>
+/* Streamlit: wrapper pode ser stButton ou stBaseButton */
+section.main button[kind="primary"] {
+  background: linear-gradient(165deg, #4338ca 0%, #6366f1 45%, #7c3aed 100%) !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(165, 180, 252, 0.45) !important;
+  box-shadow:
+    0 10px 28px rgba(67, 56, 202, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  border-radius: 14px !important;
+  min-height: 2.85rem !important;
+  transition: filter 0.15s ease, box-shadow 0.15s ease !important;
+}
+section.main button[kind="primary"]:hover {
+  filter: brightness(1.07);
+  box-shadow:
+    0 14px 36px rgba(99, 102, 241, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+section.main button[kind="primary"]:focus-visible {
+  outline: 2px solid rgba(165, 180, 252, 0.65) !important;
+  outline-offset: 2px !important;
+}
 </style>
 """
 
@@ -237,6 +303,10 @@ ROMBO_BLEED_CSS = """
 
 def inject_rombo_landing_css() -> None:
     st.markdown(ROMBO_LANDING_CSS, unsafe_allow_html=True)
+
+
+def inject_rombo_demo_button_css() -> None:
+    st.markdown(ROMBO_DEMO_BUTTON_CSS, unsafe_allow_html=True)
 
 
 def inject_rombo_bleed_css() -> None:

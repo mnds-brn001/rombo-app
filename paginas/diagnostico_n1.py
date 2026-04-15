@@ -147,6 +147,32 @@ def _resolve_expert_cta_url() -> str:
     return u or _ROMBO_DEFAULT_CALENDLY
 
 
+def _resolve_concentration_dimension(df_cancelled: pd.DataFrame) -> tuple[str | None, str]:
+    """
+    Resolve a melhor dimensão para tabela de concentração:
+    1) SKU (product_id e aliases)
+    2) Categoria (product_category_name e aliases)
+    """
+    sku_candidates = ["product_id", "sku", "codigo", "produto_id", "product_sku"]
+    category_candidates = ["product_category_name", "category_name", "categoriaArvore", "categoria"]
+
+    for col in sku_candidates:
+        if col in df_cancelled.columns:
+            series = df_cancelled[col].astype("string").str.strip()
+            usable = series.notna() & (series != "") & (series.str.lower() != "nan")
+            if bool(usable.any()):
+                return col, "SKU"
+
+    for col in category_candidates:
+        if col in df_cancelled.columns:
+            series = df_cancelled[col].astype("string").str.strip()
+            usable = series.notna() & (series != "") & (series.str.lower() != "nan")
+            if bool(usable.any()):
+                return col, "Categoria"
+
+    return None, ""
+
+
 def show(df: pd.DataFrame, *, data_path: str = "") -> None:
     """Relatório do rombo financeiro (cancelamentos). Lead já capturado na landing; benchmark + CTA aqui."""
     del data_path  # reservado para telemetria futura
@@ -206,11 +232,22 @@ def show(df: pd.DataFrame, *, data_path: str = "") -> None:
         "<span style='opacity:0.85'>SKUs que mais concentram receita perdida por cancelamento</span></p>",
         unsafe_allow_html=True,
     )
-    if not df_cancelled.empty and "product_id" in df_cancelled.columns:
+    if not df_cancelled.empty:
         df_c = df_cancelled.copy()
         df_c["_lost_line"] = per_line_lost_revenue(df_c)
+
+        dim_col, dim_label = _resolve_concentration_dimension(df_c)
+        if dim_col:
+            dim_series = df_c[dim_col].astype("string").str.strip()
+            dim_series = dim_series.mask(dim_series.isna() | (dim_series == "") | (dim_series.str.lower() == "nan"))
+            dim_series = dim_series.fillna("Não informado")
+            df_c["_dimension"] = dim_series
+        else:
+            df_c["_dimension"] = "Não informado"
+            dim_label = "Categoria"
+
         top_sku_table = (
-            df_c.groupby("product_id", as_index=False)
+            df_c.groupby("_dimension", as_index=False)
             .agg(
                 cancelamentos=("order_id", "nunique"),
                 receita_perdida=("_lost_line", "sum"),
@@ -221,7 +258,7 @@ def show(df: pd.DataFrame, *, data_path: str = "") -> None:
         if not top_sku_table.empty:
             top_sku_table = top_sku_table.rename(
                 columns={
-                    "product_id": "SKU",
+                    "_dimension": dim_label,
                     "cancelamentos": "Qtd. Cancelamentos",
                     "receita_perdida": "Receita Perdida",
                 }
@@ -247,21 +284,17 @@ def show(df: pd.DataFrame, *, data_path: str = "") -> None:
                 height=420,
                 hide_index=True,
                 column_config={
-                    "SKU": st.column_config.TextColumn("SKU", width="small"),
+                    dim_label: st.column_config.TextColumn(dim_label, width="small"),
                     "Qtd. Cancelamentos": st.column_config.NumberColumn("Qtd. Cancelamentos", width="medium"),
                     "Receita Perdida": st.column_config.NumberColumn("Receita Perdida", width="medium"),
                 },
             )
+            if dim_label == "Categoria":
+                st.caption("Fallback ativo: o export não trouxe SKU utilizável; concentração exibida por categoria.")
         else:
             st.info("Não há dados suficientes de cancelamento por SKU.")
     else:
-        if "product_id" not in df.columns:
-            st.info(
-                "Este export veio sem detalhamento de SKU no pedido. "
-                "Conseguimos calcular rombo e taxa de cancelamento, mas o Top SKUs exige coluna de produto."
-            )
-        else:
-            st.info("Não foram encontrados pedidos cancelados neste dataset.")
+        st.info("Não foram encontrados pedidos cancelados neste dataset.")
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown(
